@@ -2,7 +2,7 @@
 	<div class="app-container">
 		<div class="filter-container">
 			<el-input v-model="listQuery.code" placeholder="编码" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-			<el-input v-model="listQuery.title" placeholder="名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+			<el-input v-model="listQuery.name" placeholder="名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
 			<el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
 				查询
 			</el-button>
@@ -11,7 +11,7 @@
 			</el-button>
 		</div>
 
-		<el-table :key="tableKey" v-loading="listLoading" :data="listdata" border fit highlight-current-row style="width: 100%;">
+		<el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
 			<el-table-column label="序号" prop="id" align="center" width="80">
 				<template slot-scope="scope">
 					<span>{{ scope.row.id }}</span>
@@ -29,7 +29,7 @@
 			</el-table-column>
 			<el-table-column label="类别" width="400px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.type }}</span>
+					<span>{{ scope.row.categoryId }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
@@ -55,13 +55,13 @@
 		<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" top="0" width="65%">
 			<div class="dialogBox" style="display: flex;">
 				<!--表单-->
-				<div style="width: 40%;height: 500px;overflow:auto;border: 1px solid gainsboro;padding:20px 10px;">
+				<div style="width: 45%;height: 500px;overflow:auto;border: 1px solid gainsboro;padding:20px 10px;">
 					<el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px">
 						<div id="" style="padding: 0 10px;">
 							<el-row :gutter="10">
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="监测点编码:" label-width="85px">
-										<el-input v-model="temp.code" :disabled="true"></el-input>
+									<el-form-item label="监测点编码:" label-width="85px" prop="code">
+										<el-input v-model="temp.code"></el-input>
 									</el-form-item>
 								</el-col>
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
@@ -70,11 +70,10 @@
 									</el-form-item>
 								</el-col>
 							</el-row>
-
 							<el-row :gutter="10">
 								<el-col :span="9" :xs="18" :sm="18" :md="18" :lg="18" :xl="9">
-									<el-form-item label="地图等级：" prop="" label-width="85px">
-										<el-input v-model="temp.mapLevel" :disabled="true"></el-input>
+									<el-form-item label="地图等级：" label-width="85px">
+										<el-input v-model="temp.level" :disabled="true"></el-input>
 									</el-form-item>
 								</el-col>
 								<el-col :span="3" :xs="6" :sm="6" :md="6" :lg="6" :xl="3">
@@ -82,8 +81,8 @@
 								</el-col>
 
 								<el-col :span="9" :xs="18" :sm="18" :md="18" :lg="18" :xl="9">
-									<el-form-item label="地图定位：" prop="point" label-width="85px">
-										<el-input v-model="temp.point" :disabled="true"></el-input>
+									<el-form-item label="地图定位：" prop="location" label-width="85px">
+										<el-input v-model="temp.location" @click="getPoint()" :disabled="true"></el-input>
 									</el-form-item>
 								</el-col>
 								<el-col :span="3" :xs="6" :sm="6" :md="6" :lg="6" :xl="3">
@@ -93,31 +92,31 @@
 
 							<el-row>
 								<el-col :span="24">
-									<el-form-item label="类别：" prop="type" label-width="85px">
-										<el-select v-model="temp.type" placeholder="选择监测点类型" class="filter-item" style="width: 100%">
+									<el-form-item label="类别：" prop="categoryId" label-width="85px">
+										<el-select v-model="temp.categoryId" placeholder="选择监测点类型" class="filter-item" style="width: 100%">
 											<el-option v-for="item in mpointType" :key="item.key" :label="item.display_name" :value="item.key" />
-  									</el-select>
+										</el-select>
 									</el-form-item>
 								</el-col>
 							</el-row>
 							<el-row>
 								<el-col :span="24">
-									<el-form-item label="地址："  label-width="85px">
-										<el-input v-model="temp.name"></el-input>
+									<el-form-item label="地址：" label-width="85px">
+										<el-input v-model="temp.address"></el-input>
 									</el-form-item>
 								</el-col>
 							</el-row>
 							<el-row>
 								<el-col :span="24">
-									<el-form-item label="位置描述："  label-width="85px">
-										<el-input v-model="temp.name"></el-input>
+									<el-form-item label="位置描述：" label-width="85px">
+										<el-input v-model="temp.description"></el-input>
 									</el-form-item>
 								</el-col>
 							</el-row>
 							<el-row>
 								<el-col :span="24">
 									<el-form-item label="省网代码：" label-width="85px">
-										<el-input v-model="temp.name"></el-input>
+										<el-input v-model="temp.networkCode"></el-input>
 									</el-form-item>
 								</el-col>
 							</el-row>
@@ -131,13 +130,15 @@
 							</el-row>
 							<el-row :gutter="10">
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="部门名称:" label-width="85px">
-										<el-input v-model="temp.code"></el-input>
+									<el-form-item label="部门名称：" label-width="85px">
+										<el-select v-model="temp.manageDeptId" placeholder="选择部门" @change="manageChange" class="filter-item" style="width: 100%">
+											<el-option v-for="item in department" :key="item.id" :label="item.name" :value="item.id" />
+										</el-select>
 									</el-form-item>
 								</el-col>
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
 									<el-form-item label="负责人:" label-width="85px">
-										<el-input v-model="temp.type"></el-input>
+										<el-input v-model="manageDpat.person"></el-input>
 									</el-form-item>
 								</el-col>
 							</el-row>
@@ -145,13 +146,13 @@
 							<el-row :gutter="10">
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
 									<el-form-item label="职务：" label-width="85px">
-										<el-input v-model="temp.code"></el-input>
+										<el-input v-model="manageDpat.job"></el-input>
 									</el-form-item>
 								</el-col>
 
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
 									<el-form-item label="联系电话：" label-width="85px">
-										<el-input v-model="temp.code"></el-input>
+										<el-input v-model="manageDpat.tel"></el-input>
 									</el-form-item>
 								</el-col>
 							</el-row>
@@ -212,7 +213,7 @@
 
 				</div>
 				<!--地图-->
-				<div style="width: 60%;height: 500px;">
+				<div style="width: 55%;height: 500px;">
 					<el-amap vid="amapDemo" :center="center" :zoom="zoom" :plugin="plugin" class="amap-demo" :events="events">
 						</el-amap-marker>
 						<el-amap-marker :position="newpoint"></el-amap-marker>
@@ -245,16 +246,60 @@
 </template>
 
 <script>
-	import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/mpoint-management'
+	import { fetchList,createdata,updateData } from '@/api/mpoint-management'
 	import waves from '@/directive/waves' // waves directive
 	import { parseTime } from '@/utils'
 	import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
-const mpointType = [
-  { key: 1, display_name: '环保监测点' },
-  { key: 2, display_name: '水文监测点' },
-  { key: 3, display_name: '污染源监测点' }
-]
+	const mpointType = [{
+			key: 1,
+			display_name: '环保监测点'
+		},
+		{
+			key: 2,
+			display_name: '水文监测点'
+		},
+		{
+			key: 3,
+			display_name: '污染源监测点'
+		}
+	]
+	const department = [{
+			id: 0,
+			name: "部门0",
+			person: "商君0",
+			job: "职务",
+			tel: "12345678910"
+		},
+		{
+			id: 1,
+			name: "部门1",
+			person: "商君1",
+			job: "职务",
+			tel: "12345678910"
+		},
+		{
+			id: 2,
+			name: "部门2",
+			person: "商君2",
+			job: "职务",
+			tel: "12345678910"
+		},
+		{
+			id: 3,
+			name: "部门3",
+			person: "商君",
+			job: "职务",
+			tel: "12345678910"
+		},
+		{
+			id: 4,
+			name: "部门4",
+			person: "商君",
+			job: "职务",
+			tel: "12345678910"
+		}
+	]
 
 	export default {
 		name: 'ComplexTable',
@@ -281,8 +326,9 @@ const mpointType = [
 			let self = this;
 			return {
 				mpointType,
-				btnclevel:'获取',
-				btnpoint:'定位',
+				department,
+				btnclevel: '获取',
+				btnpoint: '定位',
 				listdata: [{
 						id: 1,
 						code: 100123,
@@ -424,23 +470,25 @@ const mpointType = [
 				showReviewer: false,
 				temp: {
 					id: undefined,
-					code:undefined,
+					code: undefined,
+					name: undefined,
+					level: undefined,
+					location: undefined,
+					categoryId: undefined,
+					address: undefined,
+					description: undefined,
+					networkCode: undefined,
+					manageDeptId: undefined,
+					owershipId: undefined,
+					attachPath: undefined
+
+				},
+				manageDpat:{
+					id:undefined,
 					name:undefined,
-					mapLevel:undefined,
-					point:undefined,
-					type:undefined,
-					address:undefined,
-					adipretion:undefined,
-					allcode:undefined,
-					competentName:undefined,
-					competentPersion:undefined,
-					competentPost:undefined,
-					competentTel:undefined,
-					powerName:undefined,
-					powerPersion:undefined,
-					powerPost:undefined,
-					powerTel:undefined
-					
+					person:undefined,
+					job:undefined,
+					tel:''
 				},
 				dialogFormVisible: false,
 				dialogStatus: '',
@@ -451,23 +499,22 @@ const mpointType = [
 				dialogPvVisible: false,
 				pvData: [],
 				rules: {
+					code: [{
+						required: true,
+						message: '监测点编码不能为空',
+						trigger: 'change'
+					}],
 					name: [{
 						required: true,
 						message: '监测点名称不能为空',
 						trigger: 'change'
 					}],
-					mapclevel: [{
-						type: 'date',
-						required: true,
-						message: '地图等级不能为空',
-						trigger: 'change'
-					}],
-					point: [{
+					location: [{
 						required: true,
 						message: '地图定位不能为空',
 						trigger: 'blur'
 					}],
-					type: [{
+					categoryId: [{
 						required: true,
 						message: '类别不能为空',
 						trigger: 'blur'
@@ -477,51 +524,77 @@ const mpointType = [
 			}
 		},
 		created() {
-			  this.getList()
+			this.getList()
 		},
 		methods: {
 			getList() {
 				this.listLoading = false
 				fetchList(this.listQuery).then(response => {
-					this.list = response.data.items
-					this.total = response.data.total
-					      setTimeout(() => {
-					        this.listLoading = false
-					      }, 1.5 * 1000)
+					var datas = response.data.list;
+//					for(var i = 0; i < datas.length;i++) {
+//						var mid = datas[i].manageDeptId
+//						console.log("mid" + mid)
+//						for(var j = 0; j< department.length; j++) {
+//							if(department[j].id == mid) {
+//								datas[i].manageDeptId = department[j];
+//							}
+//						}
+//						var oid = datas.owershipId
+//						console.log("oid" + oid)
+//						for(var k = 0; k< department.length; k++) {
+//							if(department[k].id == oid) {
+//								datas.owershipId = department[k];
+//							}
+//						}
+//					}
+
+					this.list = datas
+					console.log(datas)
+					this.total = response.data.totalRecords
+					setTimeout(() => {
+						this.listLoading = false
+					}, 1.5 * 1000)
 				})
 			},
+			manageChange(event){
+				
+				for (var i=0;i<department.length;i++) {
+					if(department[i].id==event){
+						this.manageDpat = department[i]
+					}
+				}
+			},
+			
+			
+			
+			
 			//查询
 			handleFilter() {
 				this.listQuery.page = 1
-				this.getList()
-			},
-			sortByID(order) {
-				if(order === 'ascending') {
-					this.listQuery.sort = '+id'
-				} else {
-					this.listQuery.sort = '-id'
-				}
-				this.handleFilter()
+				console.log(this.listQuery);
+//				this.getList()
 			},
 			resetTemp() {
 				this.temp = {
 					id: undefined,
-					code:"自动生成",
+					code: undefined,
+					name: undefined,
+					level: undefined,
+					location: undefined,
+					categoryId: undefined,
+					address: undefined,
+					description: undefined,
+					networkCode: undefined,
+					manageDeptId: undefined,
+					owershipId: undefined,
+					attachPath: undefined
+				},
+				this.manageDpat={
+					id:undefined,
 					name:undefined,
-					mapLevel:undefined,
-					point:undefined,
-					type:undefined,
-					address:undefined,
-					adipretion:undefined,
-					allcode:undefined,
-					competentName:undefined,
-					competentPersion:undefined,
-					competentPost:undefined,
-					competentTel:undefined,
-					powerName:undefined,
-					powerPersion:undefined,
-					powerPost:undefined,
-					powerTel:undefined
+					person:undefined,
+					job:undefined,
+					tel:''
 				}
 			},
 			handleCreate() {
@@ -535,9 +608,8 @@ const mpointType = [
 			createData() {
 				this.$refs['dataForm'].validate((valid) => {
 					if(valid) {
-						this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-						this.temp.author = 'vue-element-admin'
-						createArticle(this.temp).then(() => {
+						console.log(this.temp)
+						createdata(this.temp).then(() => {
 							this.list.unshift(this.temp)
 							this.dialogFormVisible = false
 							this.$notify({
@@ -551,8 +623,16 @@ const mpointType = [
 				})
 			},
 			handleUpdate(row) {
-				this.temp = Object.assign({}, row) // copy obj
-				this.temp.timestamp = new Date(this.temp.timestamp)
+				console.log(row)
+				this.temp = Object.assign({}, row)
+				var mid = row.manageDeptId
+				console.log("mid" + mid)
+				for(var j = 0; j< department.length; j++) {
+					if(department[j].id == mid) {
+						this.manageDpat = department[j];
+					}
+				}
+				
 				this.dialogStatus = 'update'
 				this.dialogFormVisible = true
 				this.$nextTick(() => {
@@ -563,15 +643,8 @@ const mpointType = [
 				this.$refs['dataForm'].validate((valid) => {
 					if(valid) {
 						const tempData = Object.assign({}, this.temp)
-						tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-						updateArticle(tempData).then(() => {
-							for(const v of this.list) {
-								if(v.id === this.temp.id) {
-									const index = this.list.indexOf(v)
-									this.list.splice(index, 1, this.temp)
-									break
-								}
-							}
+						console.log(tempData)
+						updateData(tempData).then(() => {
 							this.dialogFormVisible = false
 							this.$notify({
 								title: 'Success',
@@ -634,19 +707,20 @@ const mpointType = [
 				}))
 			},
 			//获取地图信息
-			getPoint(){
+			getPoint() {
 				this.getpoint = true;
-				if(this.btnpoint == "定位"){
+				if(this.btnpoint == "定位") {
 					this.btnpoint = "确定";
-				}else{
+				} else {
 					this.btnpoint = "定位"
-					this.temp.point=this.newpoint;
+					var arr = this.newpoint.join(",");
+					this.temp.location = arr;
 					this.getpoint = false;
-				}	
+				}
 			},
-			getLevel(){
+			getLevel() {
 				console.log("zoom")
-				this.temp.mapLevel = this.zoom;
+				this.temp.level = this.zoom;
 			}
 		}
 	}
@@ -660,21 +734,25 @@ const mpointType = [
 	.el-form-item__label {
 		padding: 0;
 	}
-	.el-dialog__header{
+	
+	.el-dialog__header {
 		padding: 20px;
 		background: #1890ff;
-		
 	}
-	.el-dialog__title{
+	
+	.el-dialog__title {
 		color: white;
 	}
-	.el-dialog__body{
+	
+	.el-dialog__body {
 		padding: 10px 20px;
 	}
-	.el-dialog__headerbtn .el-dialog__close{
+	
+	.el-dialog__headerbtn .el-dialog__close {
 		color: white;
 	}
-	.el-dialog__headerbtn .el-dialog__close:hover{
+	
+	.el-dialog__headerbtn .el-dialog__close:hover {
 		color: #909399;
 	}
 </style>

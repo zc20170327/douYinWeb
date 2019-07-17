@@ -1,6 +1,6 @@
 <template>
 	<div class="app-container" style="display: flex;">
-		<div class="ba_left">
+		<div class="ba_left" style="width: 30%;">
 			<div class="filter-container">
 			</div>
 			<el-table :data="listdata" border style="width: 100%;">
@@ -146,7 +146,7 @@
 		},
 		created() {
 			this.getList(),
-				this.getHeight()
+			this.getHeight()
 		},
 		methods: {
 			//	//读取表格数据
@@ -192,7 +192,6 @@
 	
 	.ba_left {
 		float: left;
-		width: 30%;
 		height: 100%;
 		padding-right: 20px;
 		display: block;

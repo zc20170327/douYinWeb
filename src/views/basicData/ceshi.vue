@@ -1,110 +1,200 @@
 <template>
-	<div>
-		<div id="gaugeContainer" style="width:500px; height:500px"></div>
-	</div>
+  <div id="mapDemo" style="height: 600px;">
+    <el-amap ref='map' vid="amapDemo" :amap-manager="amapManager" :events="mapEvents" :zoom="zoom" :center="centerPosition" class="amap-demo">
+      <el-amap-marker class="selectedMarker"
+        v-for="(item, index) in datas"
+        :key="index"
+        :position="item.lnglat"
+        topWhenClick="true"
+        :extData="item"
+        :content="getMarkerContent(item, 30, 30)"
+        :events="markerEvents">
+      </el-amap-marker>
+    </el-amap>
+  </div>
 </template>
-
 <script>
-	const echarts = require('echarts');
-	export const option = {
-		tooltip: {
-			formatter: "{a} <br/>{b} : {c}%"
-		},
-		toolbox: {
-			show: true,
-			feature: {
-				mark: {
-					show: true
-				},
-				restore: {
-					show: true
-				},
-				saveAsImage: {
-					show: true
-				}
-			}
-		},
-		series: [{
-			//类型
-        type: "gauge",
-        min: 0,
-        max: 1000,
-        //半径
-        radius: 150,
-        //起始角度。圆心 正右手侧为0度，正上方为90度，正左手侧为180度。
-        startAngle: 180,
-        //结束角度。
-        endAngle: 0,
-        center: ["50%", "90%"],
-        //仪表盘轴线相关配置。
-        axisLine: {
-          show: true,
-          // 属性lineStyle控制线条样式
-          lineStyle: {
-            width: 20,
-            color: [[1, "#63869e"]]
-          }
-        },
-        //分隔线样式。
-        splitLine: {
-          show: false
-        },
-        //刻度样式。
-        axisTick: {
-          show: false
-        },
-        //刻度标签。
-        axisLabel: {
-          show: false
-        },
-        //仪表盘指针。
-        pointer: {
-          //这个show属性好像有问题，因为在这次开发中，需要去掉指正，我设置false的时候，还是显示指针，估计是BUG吧，我用的echarts-3.2.3；希望改进。最终，我把width属性设置为0，成功搞定！
-          show: false,
-          //指针长度
-          length: "90%",
-          width: 0
-        },
-        //仪表盘标题。
-        title: {
-          show: true,
-          offsetCenter: [0, "-40%"], // x, y，单位px
-          textStyle: {
-            color: "#hhh",
-            fontSize: 30
-          }
-        },
-        //仪表盘详情，用于显示数据。
-        detail: {
-          show: true,
-          offsetCenter: [0, "-10%"],
-          formatter: "风险水平",
-          textStyle: {
-            fontSize: 30
-          }
-        },
-        data: [
+  import { AMapManager } from 'vue-amap'
+  let amapManager = new AMapManager()
+  export default {
+    data() {
+      let self = this
+      return {
+        amapManager,
+        zoom: 18, //地图缩放级别
+        centerPosition: [121.5273285, 31.21515044], // 用户当前位置经纬度
+        datas: [
           {
-            value: 0,
-            name: "低"
+            id: 1,
+            title: '1',
+            level: 'A',
+            lnglat: [121.5273285, 31.21515044],
+          },
+          {
+            id: 2,
+            title: '2',
+            level: 'A',
+            lnglat: [121.5253184, 31.21515044],
+          },
+          {
+            id: 3,
+            title: '3',
+            level: 'A',
+            lnglat: [121.5253184, 31.21315044],
+          },
+          {
+            id: 4,
+            title: '4',
+            level: 'A',
+            lnglat: [121.5253184, 31.21715044],
+          },
+          {
+            id: 5,
+            title: '5',
+            level: 'A',
+            lnglat: [121.5233184, 31.21515044],
+          },
+          {
+            id: 6,
+            title: '6',
+            level: 'A',
+            lnglat: [121.5233184, 31.21715044],
+          },
+          {
+            id: 7,
+            title: '1',
+            level: 'B',
+            lnglat: [121.5283285, 31.21815044],
+          },
+          {
+            id: 8,
+            title: '2',
+            level: 'B',
+            lnglat: [121.5293184, 31.21915044],
+          },
+          {
+            id: 9,
+            title: '3',
+            level: 'B',
+            lnglat: [121.5263184, 31.21615044],
+          },
+          {
+            id: 10,
+            title: '4',
+            level: 'B',
+            lnglat: [121.5223184, 31.21915044],
+          },
+          {
+            id: 11,
+            title: '5',
+            level: 'B',
+            lnglat: [121.5203184, 31.21515044],
+          },
+          {
+            id: 12,
+            title: '6',
+            level: 'B',
+            lnglat: [121.5233184, 31.21015044],
+          },
+          {
+            id: 13,
+            title: '1',
+            level: 'C',
+            lnglat: [121.5203285, 31.21815044],
+          },
+          {
+            id: 14,
+            title: '2',
+            level: 'C',
+            lnglat: [121.5293184, 31.21015044],
+          },
+          {
+            id: 15,
+            title: '3',
+            level: 'C',
+            lnglat: [121.5263184, 31.21315044],
+          },
+          {
+            id: 16,
+            title: '4',
+            level: 'C',
+            lnglat: [121.5223184, 31.21415044],
+          },
+          {
+            id: 17,
+            title: '5',
+            level: 'C',
+            lnglat: [121.5243184, 31.21915044],
+          },
+          {
+            id: 18,
+            title: '6',
+            level: 'C',
+            lnglat: [121.5203184, 31.20995044],
+          },
+          {
+            id: 19,
+            title: '7',
+            level: 'C',
+            lnglat: [121.5103184, 31.20995044],
           }
-        ]
-		}]
-	}
-	export default {
-		name: '',
-		data() {
-			return {
-
-			}
-		},
-		mounted() {
-			let myChart = echarts.init(document.getElementById('gaugeContainer'))
-			myChart.setOption(option);
-		}
-	}
+        ],
+        clickedMarker: null, // 保存当前点击的Marker
+        mapEvents: {
+          init(o) {
+            // o 为地图组件实例
+          },
+          complete () {
+            const map = self.amapManager.getMap() // 获取地图组件实例
+            // setFitView(overlayList:Array)
+            // 根据地图上添加的覆盖物分布情况，
+            // 自动缩放地图到合适的视野级别，参数overlayList默认为当前地图上添加的所有覆盖物图层
+            map.setFitView()
+          }
+        },
+        markerEvents: {
+          click(e) {
+            if (self.clickedMarker === e.target) return // 点击的是同一个Marker
+            const data = e.target.getExtData()
+            if (self.clickedMarker) { // 先恢复上次点击的Marker的样式
+              self.clickedMarker.setOffset(new AMap.Pixel(-10, -30))
+              self.clickedMarker.setContent(self.getMarkerContent(self.clickedMarker.getExtData(), 30, 30))
+            }
+            e.target.setContent(self.getMarkerContent(data, 40, 40, true))
+            e.target.setOffset(new AMap.Pixel(-18, -50))
+            self.clickedMarker = e.target
+          }
+        }
+      }
+    },
+    mounted() {
+      AMap.plugin('AMap.CircleEditor', function () {//回调函数
+      })
+    },
+    methods: {
+      getMarkerContent (item, width, height, isRotate = false) {
+        const bgRoate = isRotate ? 'transform: rotate(45deg);' : ''
+        const txRotate = isRotate ? 'transform: rotate(-45deg);' : ''
+        let backgroundColor = item.level === 'A' ? '#FF8100' : (item.level === 'B' ? '#8D3ECD' : '#2DCD72')
+        if ( isRotate ) {
+          backgroundColor = '#0893FF'
+        }
+        const content = `<div style="display: flex;
+                                      justify-content: center;
+                                      align-items: center;
+                                      height: ${width}px;
+                                      width: ${height}px;
+                                      border-radius: 5rem;
+                                      ${bgRoate}
+                                      font-family: Arial-BoldMT;
+                                      font-size: 16px;
+                                      color: #FFFFFF;
+                                      box-shadow: 2px 2px 4px 0 rgba(0,0,0,0.30);
+                                      background-color: ${backgroundColor};">
+                                         <div style="${txRotate}"> ${item.title} </div>
+                           </div>`
+        return content
+      }
+    },
+  }
 </script>
-
-<style scoped>
-
-</style>

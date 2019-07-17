@@ -1,7 +1,8 @@
 <template>
-	<div style="height: 700px;">
+	<div :style="contentStyleObj">
 		<el-amap vid="amapDemo" :center="center" :zoom="zoom" :plugin="plugin" class="amap-demo" :events="events">
 		</el-amap-marker>
+			 <el-amap-circle v-for="circle in circles" :center="circle.center" :radius="circle.radius" :fill-opacity="circle.fillOpacity" :events="circle.events"></el-amap-circle>
 			<el-amap-marker :position="[lng, lat]"></el-amap-marker>
 			<el-amap-polygon v-for="(polygon, index) in polygons" :vid="index" :ref="`polygon_${index}`" :path="polygon.path" :draggable="polygon.draggable" :events="polygon.events"></el-amap-polygon>
 		</el-amap>
@@ -13,11 +14,29 @@
 		data() {
 			let self = this;
 			return {
+				contentStyleObj: {
+					height: ''
+				},
 				zoom: 12,
 				center: [105.935681, 29.35842],
 				address: '',
 				lng: 105.935681,
 				lat: 29.35842,
+				circles: [
+            	{
+            		editable:true,
+              center: [105.935681, 29.35842],
+              radius: 200,
+              fillOpacity: 0.5,
+              strokeColor:'#FF0000',
+              fillColor:'#FF0000',
+              events: {
+                click: () => {
+                  alert('click');
+                }
+              }
+            }
+          ],
 				polygons: [{
 					draggable: false,
 					strokeColor: '409EFF',
@@ -106,14 +125,21 @@
 			};
 		},
 		created() {
-			this.getHeight()
+			let that = this
+			this.getHeight(),
+			window.onresize = function(){
+				var h = window.innerHeight;
+				console.log(h)
+				that.contentStyleObj.height = (h-84) + 'px';
+			}
 			
 		},
 			
 		methods: {
 			getHeight() {
 				var h = window.innerHeight;
-				alert(h)
+				console.log(h)
+				this.contentStyleObj.height = (h-84) + 'px';
 			}
 		}
 
