@@ -38,11 +38,11 @@
 						</el-tag>
 					</template>
 				</el-table-column>
-				<el-table-column label="操作" min-width="230" class-name="small-padding fixed-width">
+				<el-table-column label="操作" width="230" align="center" class-name="small-padding fixed-width">
 					<template slot-scope="{row}">
-						<el-button v-if="row.status!='deleted'" size="mini" type="defalt" @click="getDetailData(row)">
+						<!--<el-button v-if="row.status!='deleted'" size="mini" type="defalt" @click="getDetailData(row)">
 							查看
-						</el-button>
+						</el-button>-->
 						<el-button type="primary" size="mini" @click="handleUpdate(row)">
 							编辑
 						</el-button>
@@ -50,6 +50,8 @@
 							删除
 						</el-button>
 					</template>
+				</el-table-column>
+				<el-table-column label="" min-width="30" align="center">
 				</el-table-column>
 			</el-table>
 
@@ -208,21 +210,20 @@
 		},
 		created() {
 			this.getList(),
-				this.getHeight(),
-				this.getTreeData()
+				this.getHeight()
+//				this.getTreeData()
 		},
 		methods: {
-			//	//读取表格数据
+			//读取表格数据
 			getList() {
 				this.listLoading = false
-				fetchList(this.listQuery).then(response => {
-					console.log(response.data.list)
-					this.list = response.data.list;
-
-					setTimeout(() => {
-						this.listLoading = false
-					}, 1.5 * 1000)
-				})
+//				fetchList(this.listQuery).then(response => {
+//					console.log(response.data.list)
+//					this.list = response.data.list;
+//					setTimeout(() => {
+//						this.listLoading = false
+//					}, 1.5 * 1000)
+//				})
 			},
 			resetTemp() {
 				this.temp = {
@@ -256,31 +257,21 @@
 						} else if(row.status == 0) {
 							row.status = 1;
 						}
-						updateData(row).then(() => {
-							this.dialogFormVisible = false
-							this.$notify({
-								title: 'Success',
-								message: '修改成功',
-								type: 'success',
-								duration: 2000
-							})
-						})
+//						updateData(row).then(() => {
+//							this.dialogFormVisible = false
+//							this.$notify({
+//								title: 'Success',
+//								message: '修改成功',
+//								type: 'success',
+//								duration: 2000
+//							})
+//						})
 					})
 					.catch(err => {
 						console.error(err)
 					})
 			},
 
-			//查看
-			getDetailData(row) {
-				this.temp = Object.assign({}, row) // copy obj
-				//    console.log(this.temp);
-				this.dialogStatus = 'getdetail'
-				this.dialogFormVisible = true
-				this.$nextTick(() => {
-					this.$refs['dataForm'].clearValidate()
-				})
-			},
 			//创建
 			handleCreate() {
 				this.resetTemp()
@@ -296,15 +287,15 @@
 						const tempData = Object.assign({}, this.temp)
 						tempData.status = this.createstatus;
 						console.log(tempData)
-						createBasicdata(tempData).then(() => {
-							this.dialogFormVisible = false
-							this.$notify({
-								title: 'Success',
-								message: 'Created Successfully',
-								type: 'success',
-								duration: 2000
-							})
-						})
+//						createBasicdata(tempData).then(() => {
+//							this.dialogFormVisible = false
+//							this.$notify({
+//								title: 'Success',
+//								message: 'Created Successfully',
+//								type: 'success',
+//								duration: 2000
+//							})
+//						})
 					}
 				})
 				this.refreshData();
@@ -349,12 +340,12 @@
 						type: 'warning'
 					})
 					.then(async() => {
-						await deleteBasidata(row.id)
-						this.$message({
-							type: 'success',
-							message: '删除成功'
-						})
-						this.refreshData();
+//						await deleteBasidata(row.id)
+//						this.$message({
+//							type: 'success',
+//							message: '删除成功'
+//						})
+//						this.refreshData();
 					})
 					.catch(err => {
 						console.error(err)

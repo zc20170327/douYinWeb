@@ -1,8 +1,8 @@
 <template>
 	<div :style="contentStyleObj">
 		<el-amap vid="amapDemo" :center="center" :zoom="zoom" :plugin="plugin" class="amap-demo" :events="events">
-		</el-amap-marker>
-			 <el-amap-circle v-for="circle in circles" :center="circle.center" :radius="circle.radius" :fill-opacity="circle.fillOpacity" :events="circle.events"></el-amap-circle>
+			</el-amap-marker>
+			<el-amap-circle v-for="circle in circles" :center="circle.center" :radius="circle.radius" :fill-opacity="circle.fillOpacity" :events="circle.events"></el-amap-circle>
 			<el-amap-marker :position="[lng, lat]"></el-amap-marker>
 			<el-amap-polygon v-for="(polygon, index) in polygons" :vid="index" :ref="`polygon_${index}`" :path="polygon.path" :draggable="polygon.draggable" :events="polygon.events"></el-amap-polygon>
 		</el-amap>
@@ -22,21 +22,25 @@
 				address: '',
 				lng: 105.935681,
 				lat: 29.35842,
-				circles: [
-            	{
-            		editable:true,
-              center: [105.935681, 29.35842],
-              radius: 200,
-              fillOpacity: 0.5,
-              strokeColor:'#FF0000',
-              fillColor:'#FF0000',
-              events: {
-                click: () => {
-                  alert('click');
-                }
-              }
-            }
-          ],
+				circles: [{
+					editable: true,
+					center: [105.935681, 29.35842],
+					radius: 200,
+					strokeColor: 'white',
+					strokeWeight: 2,
+					strokeOpacity: 0.5,
+					fillColor: 'rgba(0,0,255,1)',
+					fillOpacity: 0.5,
+					zIndex: 10,
+					bubble: true,
+					cursor: 'pointer',
+					clickable: true,
+					events: {
+						click: () => {
+							alert('click');
+						}
+					}
+				}],
 				polygons: [{
 					draggable: false,
 					strokeColor: '409EFF',
@@ -61,12 +65,12 @@
 							lng,
 							lat
 						} = e.lnglat;
-//						self.lng = lng;
-//						self.lat = lat;
+						//						self.lng = lng;
+						//						self.lat = lat;
 
-//						var points = [self.lng, self.lat]
-//						self.polygons[0].path.push(points)
-//						console.log(self.polygons[0].path)
+						//						var points = [self.lng, self.lat]
+						//						self.polygons[0].path.push(points)
+						//						console.log(self.polygons[0].path)
 
 						// 这里通过高德 SDK 完成。
 						//						var geocoder = new AMap.Geocoder({
@@ -127,19 +131,19 @@
 		created() {
 			let that = this
 			this.getHeight(),
-			window.onresize = function(){
-				var h = window.innerHeight;
-				console.log(h)
-				that.contentStyleObj.height = (h-84) + 'px';
-			}
-			
+				window.onresize = function() {
+					var h = window.innerHeight;
+					console.log(h)
+					that.contentStyleObj.height = (h - 84) + 'px';
+				}
+
 		},
-			
+
 		methods: {
 			getHeight() {
 				var h = window.innerHeight;
 				console.log(h)
-				this.contentStyleObj.height = (h-84) + 'px';
+				this.contentStyleObj.height = (h - 84) + 'px';
 			}
 		}
 

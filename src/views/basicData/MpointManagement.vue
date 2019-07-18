@@ -167,13 +167,15 @@
 							</el-row>
 							<el-row :gutter="10">
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="部门名称:" label-width="85px">
-										<el-input v-model="temp.code"></el-input>
+									<el-form-item label="部门名称：" label-width="85px">
+										<el-select v-model="temp.owershipId" placeholder="选择部门" @change="owerChange" class="filter-item" style="width: 100%">
+											<el-option v-for="item in department" :key="item.id" :label="item.name" :value="item.id" />
+										</el-select>
 									</el-form-item>
 								</el-col>
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
 									<el-form-item label="负责人:" label-width="85px">
-										<el-input v-model="temp.type"></el-input>
+										<el-input v-model="owerDpat.person"></el-input>
 									</el-form-item>
 								</el-col>
 							</el-row>
@@ -181,17 +183,16 @@
 							<el-row :gutter="10">
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
 									<el-form-item label="职务：" label-width="85px">
-										<el-input v-model="temp.code"></el-input>
+										<el-input v-model="owerDpat.job"></el-input>
 									</el-form-item>
 								</el-col>
 
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
 									<el-form-item label="联系电话：" label-width="85px">
-										<el-input v-model="temp.code"></el-input>
+										<el-input v-model="owerDpat.tel"></el-input>
 									</el-form-item>
 								</el-col>
 							</el-row>
-
 						</div>
 						<div id="" style="border: 1px solid gainsboro;padding: 0 10px;margin: 10px 0;">
 							<el-row>
@@ -227,7 +228,7 @@
 				<el-button @click="dialogFormVisible = false">
 					取消
 				</el-button>
-				<el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+				<el-button type="primary" @click="dialogStatus==='create'?createData():updateDatas()">
 					保存
 				</el-button>
 			</div>
@@ -246,7 +247,7 @@
 </template>
 
 <script>
-	import { fetchList,createdata,updateData } from '@/api/mpoint-management'
+	import { fetchList, createdata, updateData } from '@/api/mpoint-management'
 	import waves from '@/directive/waves' // waves directive
 	import { parseTime } from '@/utils'
 	import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -483,12 +484,19 @@
 					attachPath: undefined
 
 				},
-				manageDpat:{
-					id:undefined,
-					name:undefined,
-					person:undefined,
-					job:undefined,
-					tel:''
+				manageDpat: {
+					id: undefined,
+					name: undefined,
+					person: undefined,
+					job: undefined,
+					tel: ''
+				},
+				owerDpat: {
+					id: undefined,
+					name: undefined,
+					person: undefined,
+					job: undefined,
+					tel: ''
 				},
 				dialogFormVisible: false,
 				dialogStatus: '',
@@ -531,23 +539,13 @@
 				this.listLoading = false
 				fetchList(this.listQuery).then(response => {
 					var datas = response.data.list;
-//					for(var i = 0; i < datas.length;i++) {
-//						var mid = datas[i].manageDeptId
-//						console.log("mid" + mid)
-//						for(var j = 0; j< department.length; j++) {
-//							if(department[j].id == mid) {
-//								datas[i].manageDeptId = department[j];
-//							}
-//						}
-//						var oid = datas.owershipId
-//						console.log("oid" + oid)
-//						for(var k = 0; k< department.length; k++) {
-//							if(department[k].id == oid) {
-//								datas.owershipId = department[k];
-//							}
-//						}
-//					}
-
+					for(var i = 0; i < datas.length; i++) {
+						for(var j = 0; j < this.mpointType.length; j++) {
+							if(datas[i].categoryId == mpointType[j].key) {
+								datas[i].categoryId = mpointType[j].display_name;
+							}
+						}
+					}
 					this.list = datas
 					console.log(datas)
 					this.total = response.data.totalRecords
@@ -556,46 +554,56 @@
 					}, 1.5 * 1000)
 				})
 			},
-			manageChange(event){
-				
-				for (var i=0;i<department.length;i++) {
-					if(department[i].id==event){
+			manageChange(event) {
+				for(var i = 0; i < department.length; i++) {
+					if(department[i].id == event) {
 						this.manageDpat = department[i]
 					}
 				}
 			},
-			
-			
-			
-			
+			owerChange(event) {
+				for(var i = 0; i < department.length; i++) {
+					if(department[i].id == event) {
+						this.owerDpat = department[i]
+					}
+				}
+			},
+
 			//查询
 			handleFilter() {
 				this.listQuery.page = 1
 				console.log(this.listQuery);
-//				this.getList()
+				//				this.getList()
 			},
 			resetTemp() {
 				this.temp = {
-					id: undefined,
-					code: undefined,
-					name: undefined,
-					level: undefined,
-					location: undefined,
-					categoryId: undefined,
-					address: undefined,
-					description: undefined,
-					networkCode: undefined,
-					manageDeptId: undefined,
-					owershipId: undefined,
-					attachPath: undefined
-				},
-				this.manageDpat={
-					id:undefined,
-					name:undefined,
-					person:undefined,
-					job:undefined,
-					tel:''
-				}
+						id: undefined,
+						code: undefined,
+						name: undefined,
+						level: undefined,
+						location: undefined,
+						categoryId: undefined,
+						address: undefined,
+						description: undefined,
+						networkCode: undefined,
+						manageDeptId: undefined,
+						owershipId: undefined,
+						attachPath: undefined
+					},
+					this.manageDpat = {
+						id: undefined,
+						name: undefined,
+						person: undefined,
+						job: undefined,
+						tel: ''
+					},
+					this.owerDpat = {
+						id: undefined,
+						name: undefined,
+						person: undefined,
+						job: undefined,
+						tel: ''
+					}
 			},
 			handleCreate() {
 				this.resetTemp()
@@ -625,25 +633,37 @@
 			handleUpdate(row) {
 				console.log(row)
 				this.temp = Object.assign({}, row)
+				//获取主管部门数据
 				var mid = row.manageDeptId
-				console.log("mid" + mid)
-				for(var j = 0; j< department.length; j++) {
+				for(var j = 0; j < department.length; j++) {
 					if(department[j].id == mid) {
 						this.manageDpat = department[j];
 					}
 				}
-				
+				//获取权属部门数据
+				var oid = row.owershipId
+				for(var i = 0; i < department.length; i++) {
+					if(department[i].id == oid) {
+						this.owerDpat = department[i];
+					}
+				}
 				this.dialogStatus = 'update'
 				this.dialogFormVisible = true
 				this.$nextTick(() => {
 					this.$refs['dataForm'].clearValidate()
 				})
 			},
-			updateData() {
+			updateDatas() {
 				this.$refs['dataForm'].validate((valid) => {
 					if(valid) {
 						const tempData = Object.assign({}, this.temp)
 						console.log(tempData)
+						for(var i = 0; i < mpointType.length; i++) {
+							if(tempData.categoryId == mpointType[i].display_name) {
+								tempData.categoryId = mpointType[i].key;
+							}
+						}
+
 						updateData(tempData).then(() => {
 							this.dialogFormVisible = false
 							this.$notify({
