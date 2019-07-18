@@ -217,13 +217,13 @@
 			//读取表格数据
 			getList() {
 				this.listLoading = false
-//				fetchList(this.listQuery).then(response => {
-//					console.log(response.data.list)
+				fetchList(this.listQuery).then(response => {
+					console.log(response)
 //					this.list = response.data.list;
 //					setTimeout(() => {
 //						this.listLoading = false
 //					}, 1.5 * 1000)
-//				})
+				})
 			},
 			resetTemp() {
 				this.temp = {

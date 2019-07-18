@@ -2,41 +2,45 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/article/list',
+    url: '/departments',
     method: 'get',
 	  params: query
-	  
   })
 }
-
-export function fetchArticle(id) {
+//根据id获取
+export function getIdData(id) {
   return request({
-    url: '/article/detail',
+    url: '/points/'+id,
     method: 'get',
     params: { id }
   })
 }
 
-export function fetchPv(pv) {
+//编辑
+export function updateData(data) {
   return request({
-    url: '/article/pv',
-    method: 'get',
-    params: { pv }
+    url: '/v1/pointsData/update',
+    method: 'put',
+    data
   })
 }
-
-export function createArticle(data) {
+//创建
+export function createdata(data) {
   return request({
-    url: '/article/create',
+    url: '/v1/pointsData/insert',
     method: 'post',
     data
   })
 }
 
-export function updateArticle(data) {
+//删除
+export function deleteBasidata(id) {
   return request({
-    url: '/article/update',
-    method: 'post',
-    data
+    url: '/v1/pointsData/delete/'+id,
+    method: 'delete'
   })
 }
+
+
+
+

@@ -53,7 +53,7 @@
 				</el-table-column>
 			</el-table>
 
-			<pagination v-show="total>0" :total="total" :page.sync="listQuery.pageIndex" @pagination="getList" />
+			<pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNo" @pagination="getList" />
 			<!--弹出框-->
 			<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" top="0">
 				<el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
@@ -128,8 +128,7 @@
 				listLoading: true,
 				nodeData:null,
 				listQuery: {
-					pageIndex: 1
-
+					pageNo: 1
 				},
 				treeId: 0,
 				sortOptions: [{
@@ -188,8 +187,11 @@
 			getList() {
 				this.listLoading = false
 				fetchList(this.listQuery).then(response => {
-					console.log(response.data)
+					console.log(response)
 					this.list = response.data.list;
+					
+ 				this.total=response.data.totalRecords;
+					
 
 					setTimeout(() => {
 						this.listLoading = false
@@ -201,7 +203,7 @@
 					id: undefined,
 					name: '',
 					code: undefined,
-					status: 1,
+					status: true,
 					description: '',
 					parentId: this.treeId,
 					parentName: this.parentName
@@ -268,6 +270,7 @@
 						const tempData = Object.assign({}, this.temp)
 						tempData.status = this.createstatus;
 						console.log(tempData)
+						
 						createBasicdata(tempData).then(() => {
 							this.dialogFormVisible = false
 							this.$notify({
@@ -379,7 +382,6 @@
 						children:treeData
 					}];
  				this.treelist = trees;
- 				this.total=response.data.length;
  				
 					setTimeout(() => {
 						this.listLoading = false
@@ -419,25 +421,27 @@
 				
 				this.listLoading = false
 				var id = data.id;
+				console.log(id)
 				var allListA = [];
-//				var allListB = null;
+				var allListB = [];
 				this.listQuery = {
 					parentId: id
 				}
-//				getIdlist(id).then(response => {
-//					allListB = response.data;
-//				})
 				fetchList(this.listQuery).then(response => {
 					console.log(response.data)
-					if(response.data != null) {
+					if(response.data.list.length!= 0) {
 						allListA = response.data.list;
+						this.total = response.data.totalRecords;
+						this.list = allListA
+					}else{
+						getIdlist(id).then(response => {
+							allListB = response.data;
+							allListA.unshift(allListB)
+							this.total = 1
+							this.list = allListA
+						})
 					}
-					setTimeout(() => {
-						this.listLoading = false
-					}, 1.5 * 1000)
-//					allListA.unshift(allListB)
-					this.total = allListA.length;
-					this.list = allListA
+					this.listLoading = false
 				})
 			},
 			handleFilter() {

@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/basedatas',
+    url: '/v1/basedatas',
     method: 'get',
 	  params: query
 	  
@@ -11,7 +11,7 @@ export function fetchList(query) {
 //获取树
 export function getTreeDatas(query) {
   return request({
-    url: '/basedatas/nodes',
+    url: '/v1/basedatas/nodes',
     method: 'get'
 	  
   })
@@ -19,7 +19,7 @@ export function getTreeDatas(query) {
 //根据pid获取
 export function getIdlist(id) {
   return request({
-    url: '/basedatas/'+id,
+    url: '/v1/basedatas/'+id,
     method: 'get'
   })
 }
@@ -27,7 +27,7 @@ export function getIdlist(id) {
 //编辑
 export function updateData(data) {
   return request({
-    url: '/basedatas',
+    url: '/v1/basedatas',
     method: 'put',
     data
   })
@@ -35,7 +35,7 @@ export function updateData(data) {
 //创建
 export function createBasicdata(data) {
   return request({
-    url: '/basedatas',
+    url: '/v1/basedatas',
     method: 'post',
     data
   })

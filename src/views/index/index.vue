@@ -1,97 +1,85 @@
 <template>
-	<div :style="contentStyleObj">
-		<el-amap vid="amapDemo" :center="center" :zoom="zoom" :plugin="plugin" class="amap-demo" :events="events">
+	<div id="mapDemo" :style="contentStyleObj">
+
+		<el-amap ref='map' vid="amapDemo" :amap-manager="amapManager" :events="mapEvents" :zoom="zoom" :plugin="plugin" :center="centerPosition" class="amap-demo">
+			<el-amap-info-window :position="currentWindow.position" :content="currentWindow.content" :visible="currentWindow.visible" :autoMove="false" :events="currentWindow.events">
+			</el-amap-info-window>
+
+			<el-amap-marker class="selectedMarker" v-for="(item, index) in datas" :key="index" :position="item.position" topWhenClick="true" :extData="item" :content="getMarkerContent(item, 20, 20)" :events="markerEvents">
 			</el-amap-marker>
-			<el-amap-circle v-for="circle in circles" :center="circle.center" :radius="circle.radius" :fill-opacity="circle.fillOpacity" :events="circle.events"></el-amap-circle>
-			<el-amap-marker :position="[lng, lat]"></el-amap-marker>
-			<el-amap-polygon v-for="(polygon, index) in polygons" :vid="index" :ref="`polygon_${index}`" :path="polygon.path" :draggable="polygon.draggable" :events="polygon.events"></el-amap-polygon>
 		</el-amap>
 	</div>
 </template>
 <script>
+	import { AMapManager } from 'vue-amap'
+	let amapManager = new AMapManager()
 	export default {
-
 		data() {
-			let self = this;
+			let self = this
 			return {
 				contentStyleObj: {
 					height: ''
 				},
+				amapManager,
+				interval:null,
 				zoom: 12,
-				center: [105.935681, 29.35842],
-				address: '',
-				lng: 105.935681,
-				lat: 29.35842,
-				circles: [{
-					editable: true,
-					center: [105.935681, 29.35842],
-					radius: 200,
-					strokeColor: 'white',
-					strokeWeight: 2,
-					strokeOpacity: 0.5,
-					fillColor: 'rgba(0,0,255,1)',
-					fillOpacity: 0.5,
-					zIndex: 10,
-					bubble: true,
-					cursor: 'pointer',
-					clickable: true,
-					events: {
-						click: () => {
-							alert('click');
-						}
-					}
-				}],
-				polygons: [{
-					draggable: false,
-					strokeColor: '409EFF',
-					strokeOpacity: 0.4,
-					path: [
-						//							[105.948472, 29.371798],
-						//							[105.89972, 29.34367],
-						//							[105.939546, 29.315535],
-						//							[105.948472, 29.371798]
-					],
-					events: {
-						click: (e) => {
-							alert('click polygon');
-							console.log(e)
-							console.log(self.$refs.polygon_0[0].$$getPath())
-						}
-					}
-				}],
-				events: {
-					click(e) {
-						let {
-							lng,
-							lat
-						} = e.lnglat;
-						//						self.lng = lng;
-						//						self.lat = lat;
-
-						//						var points = [self.lng, self.lat]
-						//						self.polygons[0].path.push(points)
-						//						console.log(self.polygons[0].path)
-
-						// 这里通过高德 SDK 完成。
-						//						var geocoder = new AMap.Geocoder({
-						//							radius: 1000,
-						//							extensions: "all"
-						//						});
-						//						geocoder.getAddress([lng, lat], function(status, result) {
-						//							if(status === 'complete' && result.info === 'OK') {
-						//								if(result && result.regeocode) {
-						//									self.address = result.regeocode.formattedAddress;
-						//									self.$nextTick();
-						//								}
-						//							}
-						//						});
+				tip: 3,
+				centerPosition: [105.935681, 29.35842],
+				currentWindow: {
+					position: [0, 0],
+					content: '',
+					events: {},
+					visible: false
+				},
+				datas: [{
+						id: 1,
+						title: '1',
+						level: 'A',
+						position: [105.935681, 29.35842],
+						content: 'Hi! I am here!',
+						visible: true
 					},
-					zoomchange(e) {
-						console.log(self.zoom)
-						console.log("zoomchange")
+					{
+						id: 2,
+						title: '1',
+						level: 'B',
+						position: [105.945681, 29.37842],
+						content: 'Hi! I am here!',
+						visible: true
+					},
+					{
+						id: 3,
+						title: '2',
+						level: 'C',
+						position: [105.955681, 29.39842],
+						content: 'Hi! I am here!',
+						visible: true
+					}
+				],
+				mapEvents: {
+					init(o) {
+						// o 为地图组件实例
+					},
+					complete() {
+						const map = self.amapManager.getMap() // 获取地图组件实例
+						// setFitView(overlayList:Array)
+						// 根据地图上添加的覆盖物分布情况，
+						// 自动缩放地图到合适的视野级别，参数overlayList默认为当前地图上添加的所有覆盖物图层
+						map.setFitView()
 					}
 				},
-				// 插件
+				markerEvents: {
+					mouseover(e) {
+						var interval = self.interval;
+						clearInterval(interval)
+						const datas = e.target.getExtData();
+						self.currentWindow.visible = false;
+						self.$nextTick(() => {
+							self.currentWindow = datas;
+							self.currentWindow.visible = true;
+						});
+					}
+				},
 				plugin: [{
 						pName: 'Geolocation',
 						events: {
@@ -126,7 +114,7 @@
 						}
 					}
 				]
-			};
+			}
 		},
 		created() {
 			let that = this
@@ -138,14 +126,38 @@
 				}
 
 		},
-
 		methods: {
+			getMarkerContent(item, width, height) {
+				let color1 = '#00FF00';
+				let color2 = '#FFCC00';
+				let color3 = '#FF3300';
+				let color4 = '#FFFFFF';
+				var interval = this.interval
+				clearInterval(interval)
+				if(item.level === 'C') {
+					console.log("time")
+//					interval = setInterval(() => {
+//						if(this.tip == 3) {
+//							this.tip = 4;
+//						} else if(this.tip == 4) {
+//							this.tip = 3
+//						}
+//						clearInterval(interval)
+//					}, 500)
+				}
+				let backgroundColor = item.level === 'A' ? color1 : (item.level === 'B' ? color2 : (this.tip == 3 ? color3 : color4))
+				const content = `<div style="height: 35px;width: 35px;">
+                                <div style="height: ${width}px;width: ${height}px;border-radius: 1rem;box-shadow: 2px 2px 4px 0 rgba(0,0,0,0.30);background-color: ${backgroundColor};margin-top:15px;">
+                           		</div>
+                          </div>`
+				return content
+			},
 			getHeight() {
 				var h = window.innerHeight;
 				console.log(h)
 				this.contentStyleObj.height = (h - 84) + 'px';
 			}
-		}
 
+		},
 	}
 </script>

@@ -1,13 +1,21 @@
 
 
 <template>
-  <div id="mapDemo" style="height: 500px;">
+  <div id="mapDemo" :style="contentStyleObj">
   	
-    <el-amap ref='map' vid="amapDemo" :amap-manager="amapManager" :events="mapEvents" :zoom="zoom" :center="centerPosition" class="amap-demo">
-      <el-amap-marker class="selectedMarker"
+    <el-amap ref='map' vid="amapDemo" :amap-manager="amapManager" :events="mapEvents" :zoom="zoom" :plugin="plugin" :center="centerPosition" class="amap-demo">
+        <el-amap-info-window
+          :position="currentWindow.position"
+          :content="currentWindow.content"
+          :visible="currentWindow.visible"
+          :autoMove="false"
+          :events="currentWindow.events">
+        </el-amap-info-window>
+     
+     <el-amap-marker class="selectedMarker"
         v-for="(item, index) in datas"
         :key="index"
-        :position="item.lnglat"
+        :position="item.position"
         topWhenClick="true"
         :extData="item"
         :content="getMarkerContent(item, 20, 20)"
@@ -23,31 +31,45 @@
     data() {
       let self = this
       return {
+      	contentStyleObj: {
+					height: ''
+				},
         amapManager,
-        zoom: 12, //地图缩放级别
+        zoom: 12, 
         tip:3,
-        centerPosition: [121.5273285, 31.21515044], // 用户当前位置经纬度
+        centerPosition: [105.935681, 29.35842], 
+        currentWindow: {
+            position: [0, 0],
+            content: '',
+            events: {},
+            visible: false
+        },
         datas: [
           {
             id: 1,
             title: '1',
             level: 'A',
-            lnglat: [121.5273285, 31.21515044],
+            position: [105.935681, 29.35842],
+            content: 'Hi! I am here!',
+            visible: true
           },
           {
-            id: 7,
+            id: 2,
             title: '1',
             level: 'B',
-            lnglat: [121.5283285, 31.21815044],
+            position: [105.945681, 29.37842],
+            content: 'Hi! I am here!',
+            visible: true
           },
           {
-            id: 8,
+            id: 3,
             title: '2',
             level: 'C',
-            lnglat: [121.5293184, 31.21915044],
+            position: [105.955681, 29.39842],
+            content: 'Hi! I am here!',
+            visible: true
           }
         ],
-        clickedMarker: null, // 保存当前点击的Marker
         mapEvents: {
           init(o) {
             // o 为地图组件实例
@@ -61,24 +83,61 @@
           }
         },
         markerEvents: {
-          click(e) {
-//          if (self.clickedMarker === e.target) return // 点击的是同一个Marker
-//          const data = e.target.getExtData()
-//          if (self.clickedMarker) { // 先恢复上次点击的Marker的样式
-//            self.clickedMarker.setOffset(new AMap.Pixel(-10, -30))
-//            self.clickedMarker.setContent(self.getMarkerContent(self.clickedMarker.getExtData(), 30, 30))
-//          }
-//          e.target.setContent(self.getMarkerContent(data, 40, 40, true))
-//          e.target.setOffset(new AMap.Pixel(-18, -50))
-//          self.clickedMarker = e.target
-          }
-        }
+        	mouseover(e){
+        		const datas = e.target.getExtData();
+        		self.currentWindow.visible = false;
+          	self.$nextTick(() => {
+            	self.currentWindow = datas;
+            	self.currentWindow.visible = true;
+          	});
+        	}
+        },
+        plugin: [{
+						pName: 'Geolocation',
+						events: {
+							init(o) {
+								// o 是高德地图定位插件实例
+								o.getCurrentPosition((status, result) => {
+									if(result && result.position) {
+										self.lng = result.position.lng;
+										self.lat = result.position.lat;
+										self.center = [self.lng, self.lat];
+										self.loaded = true;
+									}
+								});
+							}
+						}
+					},
+					{
+						pName: 'MapType',
+						defaultType: 0,
+						events: {
+							init(instance) {
+								console.log(instance);
+							}
+						}
+					},
+					{
+						pName: 'ToolBar',
+						events: {
+							init(instance) {
+								console.log(instance);
+							}
+						}
+					}
+				]
       }
     },
-    mounted() {
-//    AMap.plugin('AMap.CircleEditor', function () {//回调函数
-//    })
-    },
+    created() {
+			let that = this
+			this.getHeight(),
+				window.onresize = function() {
+					var h = window.innerHeight;
+					console.log(h)
+					that.contentStyleObj.height = (h - 84) + 'px';
+				}
+
+		},
     methods: {
       getMarkerContent (item, width, height) {
       	let color1 = '#00FF00';
@@ -88,20 +147,16 @@
       	let interval = null;
       	clearInterval(interval)
       	if(item.level === 'C'){
-      		interval = setInterval(() => {
-      			if(this.tip == 3){
-      				this.tip = 4;
-      			}else if(this.tip == 4){
-      				this.tip = 3
-      			}
-      			clearInterval(interval)
-			}, 500)
+//    		interval = setInterval(() => {
+//    			if(this.tip == 3){
+//    				this.tip = 4;
+//    			}else if(this.tip == 4){
+//    				this.tip = 3
+//    			}
+//    			clearInterval(interval)
+//					}, 500)
       	}
-      	
-      	
-      	
         let backgroundColor = item.level === 'A' ? color1 : (item.level === 'B' ? color2 : (this.tip==3  ? color3 : color4))
-//      let backgroundColor = item.level === 'A' ? color1 : (item.level === 'B' ? color2 : color3)
         const content = `<div style="display: flex;
                                       justify-content: center;
                                       align-items: center;
@@ -114,10 +169,15 @@
                                       box-shadow: 2px 2px 4px 0 rgba(0,0,0,0.30);
                                       background-color: ${backgroundColor};
                                       ">
-                                      <img src="../../../public/danger.gif" style="width: 10px;height: 10px;"/>
                            </div>`
         return content
-    }
+    	},
+    	getHeight() {
+				var h = window.innerHeight;
+				console.log(h)
+				this.contentStyleObj.height = (h - 84) + 'px';
+			}
+    	
     },
   }
 </script>
