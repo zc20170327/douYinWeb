@@ -15,10 +15,10 @@
 					新建基础数据
 				</el-button>
 				
-				<router-link to="/profile/index">
-          <el-button class="filter-item" style="margin-left: 10px;" type="primary" class="">
+				<router-link :to="{path:'/basicData/toDetail',query:{id:0}}">
+          		<el-button class="filter-item" style="margin-left: 10px;" type="primary">
 							页面跳转
-					</el-button>
+				</el-button>
         </router-link>
 				
 			</div>
@@ -264,15 +264,6 @@
 						} else if(row.status == 0) {
 							row.status = 1;
 						}
-//						updateData(row).then(() => {
-//							this.dialogFormVisible = false
-//							this.$notify({
-//								title: 'Success',
-//								message: '修改成功',
-//								type: 'success',
-//								duration: 2000
-//							})
-//						})
 					})
 					.catch(err => {
 						console.error(err)
@@ -294,6 +285,7 @@
 						const tempData = Object.assign({}, this.temp)
 						tempData.status = this.createstatus;
 						console.log(tempData)
+						
 //						createBasicdata(tempData).then(() => {
 //							this.dialogFormVisible = false
 //							this.$notify({
@@ -463,6 +455,14 @@
 					type: 'success'
 				})
 				row.status = status
+			},
+			
+			
+			
+			
+			toCreate(paths,tid){
+				console.log(paths+tid)
+				this.$router.push({path:paths+tid})
 			}
 
 		}

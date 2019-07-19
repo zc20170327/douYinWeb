@@ -97,6 +97,7 @@ export const constantRoutes = [
       }
     ]
   }
+  
 ]
 
 /**
@@ -148,6 +149,13 @@ export const asyncRoutes = [
         component: () => import('@/views/basicData/ceshi'),
         name: '测试',
         meta: { title: '测试' }
+      },
+      {
+        path: 'toDetail',
+        component: () => import('@/views/basicData/toDetail'),
+        name: '创建',
+        hidden: true,
+        meta: { title: '创建' }
       }
 
     ]
@@ -212,37 +220,37 @@ export const asyncRoutes = [
         component: () => import('@/views/filesManagement/filesRecord/index'),
         name: '案卷登记',
         meta: { title: '案卷登记' }
-      },
-      {
-        path: 'index',
-        component: () => import('@/views/filesManagement/filesListTable/index'),
-        name: '案卷列表',
-        meta: { title: '案卷列表' }
-      },
-      {
-        path: 'index',
-        component: () => import('@/views/filesManagement/allFiles/index'),
-        name: '所有案卷',
-        meta: { title: '所有案卷' }
-      },
-      {
-        path: 'index',
-        component: () => import('@/views/filesManagement/filesForWaitingHandle/index'),
-        name: '待办案卷',
-        meta: { title: '待办案卷' }
-      },
-      {
-        path: 'index',
-        component: () => import('@/views/filesManagement/filesForSending/index'),
-        name: '已派案卷',
-        meta: { title: '已派案卷' }
-      },
-      {
-        path: 'index',
-        component: () => import('@/views/filesManagement/filesForFinished/index'),
-        name: '已办案卷',
-        meta: { title: '已办案卷' }
       }
+//    {
+//      path: 'index',
+//      component: () => import('@/views/filesManagement/filesListTable/index'),
+//      name: '案卷列表',
+//      meta: { title: '案卷列表' }
+//    },
+//    {
+//      path: 'index',
+//      component: () => import('@/views/filesManagement/allFiles/index'),
+//      name: '所有案卷',
+//      meta: { title: '所有案卷' }
+//    },
+//    {
+//      path: 'index',
+//      component: () => import('@/views/filesManagement/filesForWaitingHandle/index'),
+//      name: '待办案卷',
+//      meta: { title: '待办案卷' }
+//    },
+//    {
+//      path: 'index',
+//      component: () => import('@/views/filesManagement/filesForSending/index'),
+//      name: '已派案卷',
+//      meta: { title: '已派案卷' }
+//    },
+//    {
+//      path: 'index',
+//      component: () => import('@/views/filesManagement/filesForFinished/index'),
+//      name: '已办案卷',
+//      meta: { title: '已办案卷' }
+//    }
 
     ]
   },

@@ -510,12 +510,12 @@
 					code: [{
 						required: true,
 						message: '监测点编码不能为空',
-						trigger: 'change'
+						trigger: 'blur'
 					}],
 					name: [{
 						required: true,
 						message: '监测点名称不能为空',
-						trigger: 'change'
+						trigger: 'blur'
 					}],
 					location: [{
 						required: true,
