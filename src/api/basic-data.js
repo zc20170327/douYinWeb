@@ -5,26 +5,26 @@ export function fetchList(query) {
     url: '/basedatas',
     method: 'get',
 	  params: query
-	  
+
   })
 }
-//获取树
+// 获取树,获取基础数据
 export function getTreeDatas(query) {
   return request({
     url: '/basedatas/nodes',
     method: 'get'
-	  
+
   })
 }
-//根据pid获取
+// 根据pid获取
 export function getIdlist(id) {
   return request({
-    url: '/basedatas/'+id,
+    url: '/basedatas/' + id,
     method: 'get'
   })
 }
 
-//编辑
+// 编辑
 export function updateData(data) {
   return request({
     url: '/basedatas',
@@ -32,7 +32,7 @@ export function updateData(data) {
     data
   })
 }
-//创建
+// 创建
 export function createBasicdata(data) {
   return request({
     url: '/basedatas',
@@ -41,14 +41,24 @@ export function createBasicdata(data) {
   })
 }
 
-//删除
+// 删除
 export function deleteBasidata(id) {
   return request({
-    url: '/basedatas/'+id,
+    url: '/basedatas/' + id,
     method: 'delete'
   })
 }
 
+/**
+ * 提交案卷管理中的案卷登记页面表单
+ * @param query
+ */
 
+export function submitFilesManageForm(data) {
+  return request({
+    url: 'http://172.2.15.111:8080/v1/archive',
+    method: 'post',
+    data
 
-
+  })
+}

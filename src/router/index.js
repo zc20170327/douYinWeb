@@ -208,38 +208,47 @@ export const asyncRoutes = [
     meta: { title: '业务管理', icon: 'list' },
     children: [
       {
-        path: 'index',
-        component: () => import('@/views/filesManagement/filesRecord/index'),
+        path: 'filesRecord',
+        component: () => import('@/views/filesManagement/filesRecord/filesRecord'),
         name: '案卷登记',
         meta: { title: '案卷登记' }
       },
       {
-        path: 'index',
-        component: () => import('@/views/filesManagement/filesListTable/index'),
+        path: 'filesListtable',
+        component: () => import('@/views/filesManagement/filesListTable/filesListtable'),
         name: '案卷列表',
         meta: { title: '案卷列表' }
       },
       {
-        path: 'index',
-        component: () => import('@/views/filesManagement/allFiles/index'),
+        path: 'allfiles',
+        component: () => import('@/views/filesManagement/allFiles/allfiles'),
         name: '所有案卷',
         meta: { title: '所有案卷' }
       },
+//       children: [
+//   {
+//     path: 'allfilesDetailsInfo',
+//     component: () => import('@/views/filesManagement/allFiles/components/allfilesDetailsInfo'),
+//     name: '案卷详情',
+//     meta: { title: '案卷详情' }
+//   },
+// ],
+
       {
-        path: 'index',
-        component: () => import('@/views/filesManagement/filesForWaitingHandle/index'),
+        path: 'filesforhandle',
+        component: () => import('@/views/filesManagement/filesForWaitingHandle/filesforhandle'),
         name: '待办案卷',
         meta: { title: '待办案卷' }
       },
       {
-        path: 'index',
-        component: () => import('@/views/filesManagement/filesForSending/index'),
+        path: 'filesforsending',
+        component: () => import('@/views/filesManagement/filesForSending/filesforsending'),
         name: '已派案卷',
         meta: { title: '已派案卷' }
       },
       {
-        path: 'index',
-        component: () => import('@/views/filesManagement/filesForFinished/index'),
+        path: 'filesforfinished',
+        component: () => import('@/views/filesManagement/filesForFinished/filesforfinished'),
         name: '已办案卷',
         meta: { title: '已办案卷' }
       }
@@ -247,9 +256,12 @@ export const asyncRoutes = [
     ]
   },
 
+
+
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
+
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support
