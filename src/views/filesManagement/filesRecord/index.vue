@@ -28,10 +28,35 @@
         <div class="issuetype">
           <el-form-item label="问题类型:" prop="issuetype" size="mini">
             <el-col>
-              <el-input v-model="ruleForm.issuetype" />
+              <el-input style="width: 96%;" v-model="ruleForm.issuetype" />
+              <svg-icon style="width:4%;margin-left: 2px;display: inline-block;float: right;height: 38px;margin-top: 5px" icon-class="search" @click="dialogVisible = true;getTreeData()"/>
+
             </el-col>
           </el-form-item>
+
+          <el-dialog
+            title="选择问题类型"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose">
+            <el-tree
+              :props="props"
+              :load="loadNode"
+              lazy
+              show-checkbox
+              @check-change="handleCheckChange">
+            </el-tree>
+
+
+<!--            <span>这是一段信息</span>-->
+<!--            <span slot="footer" class="dialog-footer">-->
+<!--    <el-button @click="dialogVisible = false">取 消</el-button>-->
+<!--    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>-->
+<!--  </span>-->
+          </el-dialog>
+
         </div>
+
         <div class="happenposition">
           <el-form-item label="事发位置:" prop="happenposition" size="mini">
             <el-col>
@@ -70,7 +95,12 @@
         </div>
         <div class="flowarea">
           <el-form-item label="所属流域:" prop="desc" size="mini">
-            <el-input v-model="ruleForm.desc" type="flowarea" />
+            <el-col>
+            <el-input style="width: 96%;display: inline-block" v-model="ruleForm.desc" type="flowarea" />
+            </el-col>
+            <el-col :span="2">
+              <svg-icon style="margin-left: 2px;display: inline-block;float: right;height: 38px;margin-top: 5px" icon-class="search" @click="dialogVisible = true"/>
+            </el-col>
           </el-form-item>
         </div>
         <div class="filesSecondNumb">
@@ -78,9 +108,10 @@
           <el-form-item label="河段长工号:" prop="rivernum" size="mini">
             <el-col :span="9">
               <el-input v-model="ruleForm.rivernum" />
-            </el-col>
+              </el-col>
+            <svg-icon style="margin-left: 3px;display: inline-block;float:left;height: 38px;" icon-class="search" @click="dialogVisible = true"/>
 
-            <el-col :span="15">
+            <el-col :span="13">
               <el-form-item class="issuefrom" label="呼入号码:" prop="callnum" size="mini">
                 <el-input v-model="ruleForm.callnum" />
               </el-form-item>
@@ -143,11 +174,11 @@
                 :show-upload-list="false"
                 action="http://172.2.15.111:8088/ecer/ecer/file/upFile1"
                 multiple
-                style="float: left;width: 100px"
+                style="float: left;width: 100px;"
               >
                 <!--             <el-button style="float: left" type="ghost">选择文件</el-button>-->
               </Upload>
-              <el-button style="float: right" type="primary" @click="upload">上传</el-button>
+              <el-button class="uploadbtn"  type="primary" @click="upload">上传</el-button>
 
               <!--           <el-button style="float: left" type="primary" @click="onSubmit">选择文件</el-button>-->
 
@@ -209,11 +240,27 @@
   </div>
 </template>
 <script>
-
-export default {
+  import { fetchList, deleteBasidata, createBasicdata, getTreeDatas, getIdlist, updateData } from '@/api/basic-data'
+  import Pagination from '@/components/Pagination'
+  export default {
   el: '#upload',
   data() {
     return {
+      dialogVisible: false,
+      list: null,
+      treelist: null,
+      createstatus: 1,
+      total: 0,
+      parentName: "无",
+      listLoading: true,
+      nodeData:null,
+      props: {
+        label: 'name',
+        children: 'zones'
+      },
+      count: 1,
+
+
       ruleForm: {
         mapposition: '',
         mapgrade: '',
@@ -333,6 +380,51 @@ export default {
   },
   methods: {
 
+    handleClose(done) {
+      this.$confirm('确认关闭？')
+        .then(_ => {
+          done();
+        })
+        .catch(_ => {});
+    },
+
+    handleCheckChange(data, checked, indeterminate) {
+      console.log(data, checked, indeterminate);
+    },
+    handleNodeClick(data) {
+      console.log(data);
+    },
+    loadNode(node, resolve) {
+      if (node.level === 0) {
+        return resolve([{ name: 'region1' }, { name: 'region2' }]);
+      }
+      if (node.level > 3) return resolve([]);
+
+      var hasChild;
+      if (node.data.name === 'region1') {
+        hasChild = true;
+      } else if (node.data.name === 'region2') {
+        hasChild = false;
+      } else {
+        hasChild = Math.random() > 0.5;
+      }
+
+      setTimeout(() => {
+        var data;
+        if (hasChild) {
+          data = [{
+            name: 'zone' + this.count++
+          }, {
+            name: 'zone' + this.count++
+          }];
+        } else {
+          data = [];
+        }
+
+        resolve(data);
+      }, 500);
+    },
+
     handleUpload(file) { // 保存需要上传的文件
       const keyID = Math.random().toString().substr(2)
       file['keyID'] = keyID
@@ -404,7 +496,28 @@ export default {
           // this.refreshData();
         }
       })
-    }
+    },
+
+    //获取树
+    getTreeData() {
+      console.log("获取树数据");
+      this.listLoading = false
+      getTreeDatas().then(response =>{
+        var treeData = this.convertToTreeData(response.data, 0)
+        var trees = [{
+          id:0,
+          label:'问题类型',
+          children:treeData
+        }];
+        alert("treedata--------"+treeData);
+        this.treelist = trees;
+        this.total=response.data.length;
+
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
+      })
+    },
 
   }
 
@@ -412,7 +525,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
   .app-container {
     width: 100%;
     height: 100%;
@@ -422,7 +535,7 @@ export default {
 
   .ba_right {
     float: right;
-    width: 60%;
+    width: 57%;
     height: 100%;
     padding-left: 10px;
   }
@@ -430,7 +543,7 @@ export default {
   .ba_left {
 
     float: left;
-    width: 40%;
+    width: 43%;
     height: 100%;
     display: flex;
     background: #ffffff;
@@ -499,45 +612,45 @@ export default {
   }
 
   .issuefrom {
-    width: 100%;
+    width: 96%;
     float: right;
 
   }
 
   .filesFirstNum {
-    width: 100%;
+    width: 96%;
     display: inline-block;
     height: 30px;
   }
 
   .issuetype {
     width: 100%;
-    display: block;
+    display:inline-block;
     height: 30px;
 
   }
 
   .happenposition {
-    width: 100%;
+    width: 96%;
     height: 30px;
     margin: 5px;
   }
 
   .mapgrade {
-    width: 100%;
+    width: 96%;
     display: inline-block;
     height: 30px;
   }
 
   .mapgradeleft {
-    width: 50%;
+    width: 48%;
     height: 30px;
     display: inline-block;
     float: left;
   }
 
   .mapgraderight {
-    width: 50%;
+    width: 48%;
     height: 30px;
     display: inline-block;
     float: right;
@@ -560,7 +673,7 @@ export default {
   .flowarea {
     width: 100%;
     margin: 5px 0;
-    display: block;
+    display:inline-block;
     height: 30px;
     padding: 0 2px 0 3px;
   }
@@ -574,7 +687,7 @@ export default {
   }
 
   .filesFiveDesc {
-    width: 100%;
+    width: 96%;
     display: block;
     margin: 2px 0;
     display: block;
@@ -589,21 +702,21 @@ export default {
 
   .filesSixAddition {
     border: solid 1px #000000;
-    width: 100%;
+    width: 96%;
     height: 150px;
     display: block;
     float: left;
   }
 
   .filesThridName {
-    width: 100%;
+    width: 96%;
     display: inline-block;
     margin: 2px 0;
     height: 30px;
   }
 
   .filesFourthTel {
-    width: 100%;
+    width: 96%;
     display: inline-block;
     margin: 2px 0;
     height: 30px;
@@ -626,10 +739,16 @@ export default {
   }
 
   .submitclass {
-    width: 100%;
+    width: 96%;
     text-align: center;
     display: inline-block;
 
   }
+
+
+#upload /deep/ .addsub.uploadbtn{
+  float: left;
+  background: #ff00ff;
+}
 
 </style>
