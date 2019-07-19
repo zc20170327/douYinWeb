@@ -16,7 +16,7 @@
 				</el-button>
 				
 				<router-link to="/profile/index">
-          <el-button class="filter-item" style="margin-left: 10px;" type="primary">
+          <el-button class="filter-item" style="margin-left: 10px;" type="primary" class="">
 							页面跳转
 					</el-button>
         </router-link>
