@@ -197,6 +197,56 @@ export const asyncRoutes = [
       }
     ]
   },
+
+  // 案卷管理界面
+  {
+    path: '/filesManagement',
+    component: Layout,
+    redirect: '/filesManagement',
+    alwaysShow: true,
+    name: '业务管理',
+    meta: { title: '业务管理', icon: 'list' },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/filesManagement/filesRecord/index'),
+        name: '案卷登记',
+        meta: { title: '案卷登记' }
+      },
+      {
+        path: 'index',
+        component: () => import('@/views/filesManagement/filesListTable/index'),
+        name: '案卷列表',
+        meta: { title: '案卷列表' }
+      },
+      {
+        path: 'index',
+        component: () => import('@/views/filesManagement/allFiles/index'),
+        name: '所有案卷',
+        meta: { title: '所有案卷' }
+      },
+      {
+        path: 'index',
+        component: () => import('@/views/filesManagement/filesForWaitingHandle/index'),
+        name: '待办案卷',
+        meta: { title: '待办案卷' }
+      },
+      {
+        path: 'index',
+        component: () => import('@/views/filesManagement/filesForSending/index'),
+        name: '已派案卷',
+        meta: { title: '已派案卷' }
+      },
+      {
+        path: 'index',
+        component: () => import('@/views/filesManagement/filesForFinished/index'),
+        name: '已办案卷',
+        meta: { title: '已办案卷' }
+      }
+
+    ]
+  },
+
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
