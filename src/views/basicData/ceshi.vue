@@ -14,12 +14,11 @@
 				<el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
 					新建基础数据
 				</el-button>
-				
-				<router-link :to="{path:'/basicData/toDetail',query:{id:0}}">
+				<!--<router-link :to="{path:'/basicData/toDetail',query:{id:0}}">
           		<el-button class="filter-item" style="margin-left: 10px;" type="primary">
-							页面跳转
+					页面跳转
 				</el-button>
-        </router-link>
+        </router-link>-->
 				
 			</div>
 			<el-table :data="listData" border style="width: 100%;">
@@ -50,9 +49,12 @@
 						<!--<el-button v-if="row.status!='deleted'" size="mini" type="defalt" @click="getDetailData(row)">
 							查看
 						</el-button>-->
+						<!--<router-link :to="'/basicData/toDetail/'+row.id">{path:'/basicData/toDetail',query:{id:0}}"-->
+						<router-link :to="{path:'/basicData/toDetail',query:{id:row.id}}">
 						<el-button type="primary" size="mini" @click="handleUpdate(row)">
 							编辑
 						</el-button>
+						</router-link>
 						<el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handledelete(row)">
 							删除
 						</el-button>
@@ -364,7 +366,8 @@
 			},
 			//获取分割线高度
 			getHeight() {
-				this.contentStyleObj.height = window.innerHeight + 'px';
+				var h = window.innerHeight;
+				this.contentStyleObj.height = (h - 84) + 'px';
 			},
 			//选择状态
 			getstatus(event) {

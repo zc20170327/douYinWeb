@@ -1,5 +1,5 @@
 <template>
-	<div class="app-container" style="display: flex;">
+	<div class="app-container" style="display: flex;padding-bottom: 0;">
 		<div class="ba_left">
 			<div class="vertical_left">
 				<div>
@@ -180,7 +180,12 @@
 		created() {
 			this.getList(),
 				this.getHeight(),
-				this.getTreeData()
+				this.getTreeData(),
+			window.onresize = function() {
+					var h = window.innerHeight;
+					console.log(h)
+					that.contentStyleObj.height = (h - 84) + 'px';
+				}
 		},
 		methods: {
 			//	//读取表格数据
@@ -357,7 +362,9 @@
       		},
 			//获取分割线高度
 			getHeight() {
-				this.contentStyleObj.height = window.innerHeight + 'px';
+				var h = window.innerHeight;
+				this.contentStyleObj.height = (h - 84) + 'px';
+				
 			},
 			//选择状态
 			getstatus(event) {

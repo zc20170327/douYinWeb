@@ -6,9 +6,11 @@
 			<el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
 				查询
 			</el-button>
+			<!--<router-link :to="{path:'/basicData/toDetail',query:{id:0}}">-->
 			<el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
 				创建监测点
 			</el-button>
+<!--			</router-link>-->
 		</div>
 
 		<el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
@@ -49,7 +51,7 @@
 			</el-table-column>
 		</el-table>
 
-		<pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+		<pagination v-show="total>0" :total="total" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.limit" @pagination="getList" />
 
 		<!--弹出框-->
 		<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" top="0" width="65%">
@@ -247,7 +249,7 @@
 </template>
 
 <script>
-	import { fetchList, createdata, updateData } from '@/api/mpoint-management'
+	import { fetchList, createdata, updateData ,deleteBasidata} from '@/api/mpoint-management'
 	import waves from '@/directive/waves' // waves directive
 	import { parseTime } from '@/utils'
 	import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -330,51 +332,7 @@
 				department,
 				btnclevel: '获取',
 				btnpoint: '定位',
-				listdata: [{
-						id: 1,
-						code: 100123,
-						name: "晋江监测点",
-						type: "环保监测点"
-					},
-					{
-						id: 1,
-						code: 100123,
-						name: "晋江监测点",
-						type: "环保监测点"
-					},
-					{
-						id: 1,
-						code: 100123,
-						name: "晋江监测点",
-						type: "环保监测点"
-					},
-					{
-						id: 1,
-						code: 100123,
-						name: "晋江监测点",
-						type: "环保监测点"
-					},
-					{
-						id: 1,
-						code: 100123,
-						name: "晋江监测点",
-						type: "环保监测点"
-					},
-					{
-						id: 1,
-						code: 100123,
-						name: "晋江监测点",
-						type: "环保监测点"
-					},
-					{
-						id: 1,
-						code: 100123,
-						name: "晋江监测点",
-						type: "环保监测点"
-					}
-				],
-				parentName: "无",
-
+				
 				//地图参数
 				btnpoint: "定位",
 				btnline: "描边",
@@ -455,7 +413,7 @@
 				total: 0,
 				listLoading: false,
 				listQuery: {
-					page: 1,
+					pageIndex: 1,
 					name: undefined,
 					code: undefined
 				},
@@ -539,6 +497,7 @@
 				this.listLoading = false
 				fetchList(this.listQuery).then(response => {
 					var datas = response.data.list;
+					console.log(response)
 					for(var i = 0; i < datas.length; i++) {
 						for(var j = 0; j < this.mpointType.length; j++) {
 							if(datas[i].categoryId == mpointType[j].key) {
@@ -571,9 +530,9 @@
 
 			//查询
 			handleFilter() {
-				this.listQuery.page = 1
+				this.listQuery.pageIndex = 1
 				console.log(this.listQuery);
-				//				this.getList()
+				this.getList()
 			},
 			resetTemp() {
 				this.temp = {
@@ -618,7 +577,7 @@
 					if(valid) {
 						console.log(this.temp)
 						createdata(this.temp).then(() => {
-							this.list.unshift(this.temp)
+//							this.list.unshift(this.temp)
 							this.dialogFormVisible = false
 							this.$notify({
 								title: 'Success',
@@ -627,6 +586,7 @@
 								duration: 2000
 							})
 						})
+						this.refreshData();
 					}
 				})
 			},
@@ -673,6 +633,7 @@
 								duration: 2000
 							})
 						})
+						this.refreshData();
 					}
 				})
 			},
@@ -690,7 +651,6 @@
 							type: 'success',
 							message: '删除成功'
 						})
-						this.treeId = row.parentId;
 						this.refreshData();
 					})
 					.catch(err => {
@@ -741,7 +701,13 @@
 			getLevel() {
 				console.log("zoom")
 				this.temp.level = this.zoom;
-			}
+			},
+			//刷新数据
+			refreshData() {
+        		return setTimeout(()=>{
+						this.getList();
+        		},1000)
+      		},
 		}
 	}
 </script>
