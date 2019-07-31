@@ -1,70 +1,59 @@
 <template>
 	<div class="app-container">
 		<div class="filter-container">
-			<el-select v-model="listQuery.importance" placeholder="监测点" clearable style="width: 150px" class="filter-item">
-				<el-option v-for="item in mpointType" :key="item.name" :label="item.name" :value="item.name" />
+			<el-input v-model="listQuery.code" placeholder="案卷编号" style="width: 180px;" class="filter-item" @keyup.enter.native="handleFilter" />
+			<el-select v-model="listQuery.importance" placeholder="问题来源" clearable style="width: 180px" class="filter-item">
+				<el-option v-for="item in problemSource" :key="item.name" :label="item.name" :value="item.name" />
 			</el-select>
-			<el-select v-model="listQuery.importance" placeholder="指标" clearable style="width: 150px" class="filter-item">
-				<el-option v-for="item in targetType" :key="item.target" :label="item.target" :value="item.target" />
+			<el-select v-model="listQuery.importance" placeholder="问题类型" clearable style="width: 180px" class="filter-item">
+				<el-option v-for="item in problemType" :key="item.type" :label="item.type" :value="item.type" />
 			</el-select>
-			<!--<el-date-picker v-model="temp.timestamp" type="datetime" placeholder="监测起始时间" align="top"/>
-			<el-date-picker v-model="temp.timestamp" type="datetime" placeholder="监测结束时间" />-->
+			<el-input v-model="listQuery.code" placeholder="所属辖区" style="width: 180px;" class="filter-item" @keyup.enter.native="handleFilter" />
+			<el-select v-model="listQuery.importance" placeholder="处置部门" clearable style="width: 180px" class="filter-item">
+				<el-option v-for="item in department" :key="item.target" :label="item.name" :value="item.name" />
+			</el-select>
 			<el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
 				查询
 			</el-button>
-			<el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-				创建监测点
-			</el-button>
 		</div>
-		<el-table :key="tableKey" v-loading="listLoading" :data="listdata" border fit highlight-current-row style="width: 100%;">
+		<el-table :key="tableKey" v-loading="listLoading" :data="tableData" border fit highlight-current-row style="width: 100%;">
 			<el-table-column label="序号" prop="id" align="center" width="80">
 				<template slot-scope="scope">
-					<span>{{ scope.row.id }}</span>
+					<span>{{ scope.row.number }}</span>
 				</template>
 			</el-table-column>
-			<el-table-column label="监测点" width="150px" align="center">
+			<el-table-column label="案卷编号" width="150px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.name}}</span>
+					<span>{{ scope.row.docket_number}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column label="监测时间" width="150px" align="center">
+			<el-table-column label="问题涞源" width="150px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+					<span>{{ scope.row.source}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column label="指标" width="150px" align="center">
+			<el-table-column label="问题类型" width="150px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.target }}</span>
+					<span>{{ scope.row.type}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column label="检测值" width="100px" align="center">
+			<el-table-column label="所属辖区" width="150px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.mvalue }}</span>
+					<span>{{ scope.row.address}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column label="标准值" width="100px" align="center">
+			<el-table-column label="状态" width="80px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.svalue }}</span>
+					<span>{{ scope.row.state}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column label="单位" width="100px" align="center">
+			<el-table-column label="上报时间" width="150px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.company }}</span>
+					<span>{{ scope.row.date | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
 				</template>
 			</el-table-column>
-			<el-table-column label="是否达标" class-name="status-col" width="100px">
-				<template slot-scope="{row}">
-					<el-tag :type="row.status | statusFilter" style="cursor: pointer;">
-						{{ row.status ==1?"是":"否"}}
-					</el-tag>
-				</template>
-			</el-table-column>
-			<el-table-column label="超标倍数" width="100px" align="center">
-				<template slot-scope="scope">
-					<span>{{ scope.row.multiple }}</span>
-				</template>
-			</el-table-column>
-			<el-table-column label="操作" align="center" width="200" >
+			
+			<el-table-column label="操作" align="center" width="180" >
 				<template slot-scope="{row}">
 					<el-button type="primary" size="mini" @click="handleUpdate(row)">
 						编辑
@@ -80,84 +69,7 @@
 
 		<pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
-		<!--弹出框-->
-		<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" top="0" width="50%">
-			<div class="dialogBox" style="display: flex;">
-				<!--表单-->
-				<div style="width: 100%;height: 300px;overflow:auto;border: 1px solid gainsboro;padding:20px 10px;">
-					<el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px">
-						<div id="" style="padding: 0 10px;">
-							<el-row :gutter="10">
-								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="监测点：" prop="name" label-width="85px">
-										<el-select v-model="temp.name" placeholder="选择监测点" class="filter-item" style="width: 100%">
-											<el-option v-for="item in mpointType" :key="item.key" :label="item.name" :value="item.key" />
-  									</el-select>
-									</el-form-item>
-								</el-col>
-								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="指标：" prop="target" label-width="85px">
-										<el-select v-model="temp.target" placeholder="选择指标" class="filter-item" style="width: 100%">
-											<el-option v-for="item in targetType" :key="item.key" :label="item.target" :value="item.key" />
-  									</el-select>
-									</el-form-item>
-								</el-col>
-							</el-row>
-							<el-row :gutter="10">
-								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="监测时间:" prop="time" label-width="85px">
-										<el-date-picker v-model="temp.time" type="datetime" align="top"/>
-									</el-form-item>
-								</el-col>
-								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="检测值:" prop="mvalue" label-width="85px">
-										<el-input v-model="temp.mvalue"></el-input>
-									</el-form-item>
-								</el-col>
-							</el-row>
-							<el-row :gutter="10">
-								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="标准值:" prop="svalue" label-width="85px">
-										<el-input v-model="temp.svalue"></el-input>
-									</el-form-item>
-								</el-col>
-								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="单位：" prop="company" label-width="85px">
-										<el-select v-model="temp.company" placeholder="选择单位" class="filter-item" style="width: 100%">
-											<el-option v-for="item in companyType" :key="item.key" :label="item.company" :value="item.key" />
-  									</el-select>
-									</el-form-item>
-								</el-col>
-							</el-row>
-							<el-row :gutter="10">
-								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="是否达标：" prop="status" label-width="85px">
-										<el-select v-model="temp.status" placeholder="选择是否达标" class="filter-item" style="width: 100%">
-											<el-option v-for="item in statusType" :key="item.key" :label="item.status" :value="item.key" />
-  									</el-select>
-									</el-form-item>
-								</el-col>
-								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="超标倍数:" prop="name" label-width="85px">
-										<el-input v-model="temp.multiple"></el-input>
-									</el-form-item>
-								</el-col>
-							</el-row>
-						</div>
-					</el-form>
-
-				</div>
-			</div>
-
-			<div slot="footer" class="dialog-footer">
-				<el-button @click="dialogFormVisible = false">
-					取消
-				</el-button>
-				<el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-					保存
-				</el-button>
-			</div>
-		</el-dialog>
+		
 
 	</div>
 </template>
@@ -168,25 +80,80 @@
 	import { parseTime } from '@/utils'
 	import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
-	const mpointType = [
-		{key: 1,name: '环保监测点'},
-		{key: 2,name: '水文监测点'},
-		{key: 3,name: '污染源监测点'}
+	const problemSource = [
+		{key: 1,name: '监督员采集上报'},
+		{key: 2,name: '公众举报'}
 	]
-	const targetType = [
-		{key: 1,target: '石油类'},
-		{key: 2,target: '石油类'},
-		{key: 3,target: '石油类'}
+	const problemType = [
+		{key: 1,type: '乱采砂'},
+		{key: 2,type: '乱占乱建'},
+		{key: 3,type: '垃圾成山'}
 	]
-	const companyType = [
-		{key: 1,company: 'mg/L'},
-		{key: 2,company: 'mg/L'},
-		{key: 3,company: 'mg/L'}
+	const department = [
+		{key: 1,name: '部门1'},
+		{key: 2,name: '部门1'},
+		{key: 3,name: '部门1'}
 	]
-	const statusType = [
-		{key: 10,status: '是'},
-		{key: 11,status: '否'}
-	]
+	
+	const tableData = [
+				{
+          number:'1',
+          docket_number: '2017083100003',
+          source: '监督员采集上报',
+          type: '有人溺水',
+          address: '上海市长江出海口',
+          state: '上报',
+          date: '2016-05-06',
+        }, {
+          number:'2',
+          docket_number: '2017083100003',
+          source: '公众举报',
+          type: '发现尸体（男性）',
+          address: '上海市长江出海口',
+          state: '上报',
+          date: '2016-05-06',
+        }, {
+          number:'3',
+          docket_number: '201708310003',
+          source: '公众举报',
+          type: '垃圾成山',
+          address: '上海市长江出海口',
+          state: '上报',
+          date: '2016-05-06',
+        }, {
+          number:'4',
+          docket_number: '201708310003',
+          source: '公众举报',
+          type: '水位到达警戒线',
+          address: '上海市长江出海口',
+          state: '上报',
+          date: '2016-05-06',
+        }, {
+          number:'5',
+          docket_number: '201708310003',
+          source: '公众举报',
+          type: '私自捕鱼',
+          address: '上海市长江出海口',
+          state: '上报',
+          date: '2016-05-06',
+        }, {
+          number:'6',
+          docket_number: '201708310003',
+          source: '公众举报',
+          type: '乱采砂',
+          address: '上海市长江出海口',
+          state: '上报',
+          date: '2016-05-06',
+        }, {
+          number:'7',
+          docket_number: '201708310003',
+          source: '公众举报',
+          type: '乱占乱建',
+          address: '上海市长江出海口',
+          state: '上报',
+          date: '2016-05-06',
+        }
+    ]
 
 	export default {
 		name: 'ComplexTable',
@@ -212,10 +179,11 @@
 		data() {
 			let self = this;
 			return {
-				mpointType,
-				targetType,
-				companyType,
-				statusType,
+				tableData,
+				problemSource,
+				problemType,
+				department,
+				
 				listdata: [{
 						id: 1,
 						name: "晋江监测点",

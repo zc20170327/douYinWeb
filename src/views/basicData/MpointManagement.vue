@@ -10,7 +10,7 @@
 			<el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
 				创建监测点
 			</el-button>
-<!--			</router-link>-->
+			<!--</router-link>-->
 		</div>
 
 		<el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">

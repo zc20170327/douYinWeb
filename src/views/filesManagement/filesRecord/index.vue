@@ -1,635 +1,646 @@
-<template xmlns:el-col="http://www.w3.org/1999/html">
-  <div class="app-container" style="display: flex;">
+<template>
+	<div class="app-container">
 
-    <div class="ba_left">
-      <el-form ref="ruleForm" :model="ruleForm" :rules="rules" class="demo-ruleForm" label-width="100px">
-        <div class="filesFirstNum">
+		<div class="dialogBox" style="display: flex;" :style="contentStyleObj">
+			<!--表单-->
+			<div style="width: 45%;overflow:auto;border: 1px solid gainsboro;padding:20px 10px;">
+				<el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px">
+					<div id="" style="padding: 0 10px;">
+						<el-row :gutter="10">
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="案卷编号:" label-width="85px" prop="code">
+									<el-input v-model="temp.code" disabled placeholder="自动生成"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="问题来源：" prop="categoryId" label-width="85px">
+									<el-select v-model="temp.resource" placeholder="选择问题来源" class="filter-item" style="width: 100%">
+										<el-option v-for="item in mpointType" :key="item.key" :label="item.display_name" :value="item.key" />
+									</el-select>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="问题类型：" label-width="85px">
+									<el-select v-model="temp.categoryId" placeholder="选择问题类型" class="filter-item" style="width: 100%">
+										<el-option v-for="item in mpointType" :key="item.key" :label="item.display_name" :value="item.key" />
+									</el-select>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="事发位置：" label-width="85px">
+									<el-input v-model="temp.address"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row :gutter="10">
+							<el-col :span="9" :xs="18" :sm="18" :md="18" :lg="18" :xl="9">
+								<el-form-item label="地图等级：" label-width="85px">
+									<el-input v-model="temp.level" :disabled="true"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="3" :xs="6" :sm="6" :md="6" :lg="6" :xl="3">
+								<el-button type="primary" @click="getLevel()" style="width: 100%;padding: 10px 10px;">{{btnclevel}}</el-button>
+							</el-col>
 
-          <el-form-item label="案卷编号:" prop="filesnum" size="mini">
-            <el-col :span="9">
-              <el-input v-model="ruleForm.filesnum" />
-            </el-col>
+							<el-col :span="9" :xs="18" :sm="18" :md="18" :lg="18" :xl="9">
+								<el-form-item label="地图定位：" prop="location" label-width="85px">
+									<el-input v-model="temp.location" @click="getPoint()" :disabled="true"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="3" :xs="6" :sm="6" :md="6" :lg="6" :xl="3">
+								<el-button type="primary" @click="getPoint()" style="width: 100%;padding: 10px 10px;">{{btnpoint}}</el-button>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="所属流域：" label-width="85px">
+									<el-select v-model="temp.categoryId" placeholder="选择所属流域" class="filter-item" style="width: 100%">
+										<el-option v-for="item in mpointType" :key="item.key" :label="item.display_name" :value="item.key" />
+									</el-select>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row :gutter="10">
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="河段长工号：" label-width="85px" class="el-margin-bottom">
+									<el-select v-model="temp.owershipId" placeholder="选择部门" @change="owerChange" class="filter-item" style="width: 100%">
+										<el-option v-for="item in department" :key="item.id" :label="item.name" :value="item.id" />
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="呼入号码:" label-width="85px" class="el-margin-bottom">
+									<el-input v-model="owerDpat.person"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row :gutter="10">
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="河段长姓名：" label-width="85px" class="el-margin-bottom">
+									<el-input v-model="owerDpat.person"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="举报人姓名:" label-width="85px" class="el-margin-bottom">
+									<el-input v-model="owerDpat.person"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row :gutter="10">
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="河段长电话：" label-width="85px">
+									<el-input v-model="owerDpat.person"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="举报人电话:" label-width="85px">
+									<el-input v-model="owerDpat.person"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="备注" class="el-margin-bottom">
+									<el-input v-model="temp.description" :autosize="{ minRows: 4, maxRows: 4}" type="textarea" placeholder="备注" />
+								</el-form-item>
+							</el-col>
+						</el-row>
 
-            <el-col :span="15">
-              <el-form-item class="issuefrom" label="问题来源:" prop="issueorig" size="mini">
-                <el-select v-model="ruleForm.issueorig" placeholder="请选择">
-                  <el-option label="公众发现问题举报" value="shanghai" />
-                  <el-option label="市领导下达任务" value="beijing" />
-                  <el-option label="视频监控发现" value="beijing" />
-                  <el-option label="监督员采集上报" value="beijing" />
-                </el-select>
-                <!--          <el-input class="issuefrom" v-model="ruleForm.name"></el-input>-->
-              </el-form-item>
+					</div>
+					<div id="" style="border: 1px solid gainsboro;padding: 0 10px;margin: 10px 0;">
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="上传附件：" label-width="85px" class="el-margin-bottom">
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<div class="grid-content">
+								<div class="upload_title" id="upload">
+									<el-col :span="6">
+										<Upload ref="upload" :before-upload="handleUpload" :on-success="uploadSuccess" :show-upload-list="true" action="http://172.2.15.111:8088/v1/fileUpload?tempId=1569840" multiple style="float: left;width:auto">
+											<el-button type="primary" size="mini" id="ive-upload-input">选择文件<i class="el-icon-search el-icon--right" style="color: #fff;"></i>
+											</el-button>
+										</Upload>
 
-            </el-col>
-          </el-form-item>
+									</el-col>
+									<el-col :span="12">
+										<p>未选择文件</p>
+									</el-col>
 
-        </div>
-        <div class="issuetype">
-          <el-form-item label="问题类型:" prop="issuetype" size="mini">
-            <el-col>
-              <el-input v-model="ruleForm.issuetype" />
-            </el-col>
-          </el-form-item>
-        </div>
-        <div class="happenposition">
-          <el-form-item label="事发位置:" prop="happenposition" size="mini">
-            <el-col>
-              <el-input v-model="ruleForm.happenposition" />
-            </el-col>
+									<el-col :span="6">
+										<el-button type="primary" size="mini" style="float: right;" @click="upload">上传<i class="el-icon-upload el-icon--right"></i></el-button>
+									</el-col>
+								</div>
 
-          </el-form-item>
-        </div>
-        <div class="mapgrade">
-          <div class="mapgradeleft">
-            <el-form-item label="地图等级" prop="mapgrade" size="mini">
-              <el-col :span="13">
-                <el-input v-model="ruleForm.mapgrade" />
-              </el-col>
-              <el-col :span="10" class="getgrade">
-                <el-button type="primary" @click="onSubmit">获取</el-button>
-              </el-col>
-            </el-form-item>
-            <!--        <el-form-item class="getgrade">-->
-            <!--          <el-button type="primary" @click="onSubmit">获取</el-button>-->
-            <!--        </el-form-item>-->
-          </div>
-          <div class="mapgraderight">
-            <el-form-item label="地图定位" prop="mapposition" size="mini">
-              <el-col :span="13">
-                <el-input v-model="ruleForm.mapposition" />
-              </el-col>
-              <el-col :span="10" class="getpos">
-                <el-button type="primary" @click="onSubmit">定位</el-button>
-              </el-col>
-            </el-form-item>
-            <!--          <el-form-item class="getpos">-->
-            <!--            <el-button type="primary" @click="onSubmit">定位</el-button>-->
-            <!--          </el-form-item>-->
-          </div>
-        </div>
-        <div class="flowarea">
-          <el-form-item label="所属流域:" prop="desc" size="mini">
-            <el-input v-model="ruleForm.desc" type="flowarea" />
-          </el-form-item>
-        </div>
-        <div class="filesSecondNumb">
+								<el-table :data="tableData" style="width: 100%">
 
-          <el-form-item label="河段长工号:" prop="rivernum" size="mini">
-            <el-col :span="9">
-              <el-input v-model="ruleForm.rivernum" />
-            </el-col>
+									<el-table-column prop="number" label="序号" width="50" align="center">
+									</el-table-column>
 
-            <el-col :span="15">
-              <el-form-item class="issuefrom" label="呼入号码:" prop="callnum" size="mini">
-                <el-input v-model="ruleForm.callnum" />
-              </el-form-item>
+									<el-table-column prop="state" label="状态" width="80" align="center">
+									</el-table-column>
 
-            </el-col>
-          </el-form-item>
+									<el-table-column prop="name" label="名称" width="160" :show-overflow-tooltip="true" align="center">
+									</el-table-column>
 
-        </div>
-        <div class="filesThridName">
+									<el-table-column prop="rom" label="大小" width="90" align="center">
+									</el-table-column>
 
-          <el-form-item label="河段长姓名:" prop="rivername" size="mini">
-            <el-col :span="9">
-              <el-input v-model="ruleForm.rivername" />
-            </el-col>
+									<el-table-column align="center" label="操作" width="90">
+										<el-button @click.native.prevent="deleteRow(scope.$index, tableData4)" type="text" size="small" style="margin-right: 4px;">
+											编辑
+										</el-button>|
+										<el-button @click.native.prevent="deleteRow(scope.$index, tableData4)" type="text" size="small" style="margin-left:0 ;">
+											移除
+										</el-button>
+									</el-table-column>
 
-            <el-col :span="15">
-              <el-form-item class="issuefrom" label="举报人姓名:" prop="respname" size="mini">
-                <el-input v-model="ruleForm.respname" />
-              </el-form-item>
+								</el-table>
 
-            </el-col>
-          </el-form-item>
+							</div>
 
-        </div>
-        <div class="filesFourthTel">
+						</el-row>
 
-          <el-form-item label="河段长电话:" prop="rivertel" size="mini">
-            <el-col :span="9">
-              <el-input v-model="ruleForm.rivertel" />
-            </el-col>
+					</div>
+					<div align="right">
+						<el-button @click="closeWindow('/basicData/ceshi')">
+							取消
+						</el-button>
+						<el-button type="primary" @click="dialogStatus==='create'?createData():updateDatas()">
+							保存
+						</el-button>
+					</div>
 
-            <el-col :span="15">
-              <el-form-item class="issuefrom" label="举报人电话:" prop="resptel" size="mini">
-                <el-input v-model="ruleForm.resptel" />
-              </el-form-item>
+				</el-form>
 
-            </el-col>
-          </el-form-item>
+			</div>
+			<!--地图-->
+			<div style="width: 55%;">
+				<el-amap vid="amapDemo" :center="center" :zoom="zoom" :plugin="plugin" class="amap-demo" :events="events">
+					</el-amap-marker>
+					<el-amap-marker :position="newpoint"></el-amap-marker>
+					<el-amap-polygon v-for="(polygon, index) in polygons" :vid="index" :ref="`polygon_${index}`" :path="polygon.path" :draggable="polygon.draggable" :events="polygon.events"></el-amap-polygon>
+				</el-amap>
 
-        </div>
-        <div class="filesFiveDesc">
+			</div>
+		</div>
 
-          <el-form-item label="情况描述:" prop="infodesc" size="large">
-            <el-col>
-              <el-input v-model="ruleForm.infodesc" type="text" />
-            </el-col>
-
-          </el-form-item>
-
-        </div>
-        <el-form-item class="addsub" label="上传附件" prop="infodesc" size="mini" />
-        <div class="filesSixAddition">
-          <div id="upload" class="selectFileSubmit">
-            <el-form-item label="选择文件:" prop="infodesc" size="mini">
-
-              <Upload
-                ref="upload"
-                :before-upload="handleUpload"
-                :on-success="uploadSuccess"
-                :show-upload-list="false"
-                action="http://172.2.15.111:8088/ecer/ecer/file/upFile1"
-                multiple
-                style="float: left;width: 100px"
-              >
-                <!--             <el-button style="float: left" type="ghost">选择文件</el-button>-->
-              </Upload>
-              <el-button style="float: right" type="primary" @click="upload">上传</el-button>
-
-              <!--           <el-button style="float: left" type="primary" @click="onSubmit">选择文件</el-button>-->
-
-            </el-form-item>
-
-          </div>
-          <el-table
-            :data="tableData"
-            height="100"
-            style="width: 100%"
-          >
-            <el-table-column
-              fixed
-              label="日期"
-              prop="date"
-              width="50"
-            />
-            <el-table-column
-              label="状态"
-              prop="name"
-              width="50"
-            />
-            <el-table-column
-              label="名称"
-              prop="province"
-              width="120"
-            />
-            <el-table-column
-              label="大小"
-              prop="city"
-              width="50"
-            />
-            <el-table-column
-              label="操作"
-              prop="address"
-              width="60"
-            />
-
-          </el-table>
-
-        </div>
-        <div class="submitclass">
-          <el-button type="primary" @click="dialogStatus==='create'?createData():onSaveFormSubmit()">保存</el-button>
-        </div>
-      </el-form>
-
-    </div>
-
-    <div class="ba_right">
-
-      <div class="filter-container">
-        <!--        <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">-->
-        <!--         案卷登记地图-->
-        <!--        </el-button>-->
-
-      </div>
-
-    </div>
-  </div>
+	</div>
 </template>
+
 <script>
+	import { uploadFiles,fetchList, createdata, updateData } from '@/api/filesManagement/files-record'
 
-export default {
-  el: '#upload',
-  data() {
-    return {
-      ruleForm: {
-        mapposition: '',
-        mapgrade: '',
-        happenposition: '',
-        issuetype: '',
-        issueorig: '',
-        filesnum: '',
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: ''
-      },
-      rules: {
-        mapposition: [
-          {
-            required: true, message: '请获取地图定位', trigger: 'blur'
-          }
-        ],
-        mapgrade: [
-          {
-            required: true, message: '请获取地图等级', trigger: 'blur'
-          }
-        ],
-        happenposition: [
-          {
-            required: true, message: '请输入事发位置', trigger: 'blur'
-          }
-        ],
-        issuetype: [
-          {
-            required: true, message: '请输入问题类型', trigger: 'blur'
-          }
-        ],
-        issueorig: [
-          {
-            required: true, message: '请选择问题来源', trigger: 'change'
-          }
-        ],
-        filesnum: [
-          {
-            required: true, message: '请输入案卷编号', trigger: 'blur'
-          }
+	const mpointType = [{
+			key: 1,
+			display_name: '环保监测点'
+		},
+		{
+			key: 2,
+			display_name: '水文监测点'
+		},
+		{
+			key: 3,
+			display_name: '污染源监测点'
+		}
+	]
+	const department = [{
+			id: 0,
+			num: 123456,
+			name: "部门0",
+			person: "商君0",
+			job: "职务",
+			tel: "12345678910"
+		},
+		{
+			id: 1,
+			num: 456789,
+			name: "部门1",
+			person: "商君1",
+			job: "职务",
+			tel: "12345678910"
+		}
+	]
 
-        ],
-        name: [
-          { required: true, message: '请输入案卷编号', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 5 个字符', trigger: 'blur' }
-        ],
-        region: [
-          { required: true, message: '请选择问题来源', trigger: 'change' }
-        ],
-        date1: [
-          { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
-        ],
-        date2: [
-          { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
-        ],
-        type: [
-          { type: 'array', required: true, message: '请至少选择一个活动性质', trigger: 'change' }
-        ],
-        resource: [
-          { required: true, message: '请选择活动资源', trigger: 'change' }
-        ],
-        desc: [
-          { required: true, message: '请填写所属流域', trigger: 'blur' }
-        ]
-      },
+	export default {
 
-      columns1: [
-        {
-          title: '文件名',
-          key: 'name'
-        },
-        {
-          title: '大小',
-          key: 'sizes'
-        },
-        {
-          title: '操作',
-          key: '',
-          render: (h, params) => {
-            return h('Button', {
-              props: {
-                type: 'error',
-                size: 'small'
-              },
-              on: {
-                click: () => {
-                  this.deleteAttBtn(params.index)
-                }
-              }
-            }, '删除')
-          }
-        }
-      ],
+		data() {
+			let self = this;
+			return {
+				contentStyleObj: {
+					height: ''
+				},
+				mpointType,
+				department,
+				btnclevel: '获取',
+				btnpoint: '定位',
 
-      file: [{
-        name: 'aaa.jpg',
-        type: 'image/jpeg',
-        keyID: 123479
-      }, {
-        name: 'bbb.jpg',
-        type: 'image/jpeg',
-        keyID: 987654
-      }], // 总文件List
-      uploadFile: [] // 需要上传的文件List
-    }
-  },
-  mounted() {
-    // var RESREQUESTPREFIX='172.2.15.111:8080/ecer/ecer/file/upFile1';
-    // this.upDataUrl = RESREQUESTPREFIX
-    // this.uploadList = this.$refs.upload.fileList;
-  },
-  methods: {
+				//地图参数
+				btnpoint: "定位",
+				btnline: "描边",
+				getpoint: false,
+				zoom: 12,
+				center: [105.935681, 29.35842],
+				address: '',
+				newpoint: [105.935681, 29.35842],
+				polygons: [{
+					draggable: false,
+					strokeColor: '409EFF',
+					strokeOpacity: 0.4,
+					path: [],
+					events: {
+						click: (e) => {
+							alert('click polygon');
+							console.log(e)
+							console.log(self.$refs.polygon_0[0].$$getPath())
+						}
+					}
+				}],
+				events: {
+					click(e) {
+						let {
+							lng,
+							lat
+						} = e.lnglat;
+						self.lng = lng;
+						self.lat = lat;
+						console.log([lng, lat])
+						if(self.getpoint) {
+							self.newpoint = [lng, lat];
+						}
 
-    handleUpload(file) { // 保存需要上传的文件
-      const keyID = Math.random().toString().substr(2)
-      file['keyID'] = keyID
-      this.file.push(file)
-      this.uploadFile.push(file)
-      return false
-    },
-    delectFile(keyID) { // 删除文件
-      this.file = this.file.filter(item => {
-        return item.keyID != keyID
-      })
-      this.uploadFile = this.uploadFile.filter(item => {
-        return item.keyID != keyID
-      })
-    },
-    upload() { // 上传文件
-      if (this.uploadFile.length === 0) {
-        this.$Message.error('未选择上传文件')
-        return false
-      }
-      for (let i = 0; i < this.uploadFile.length; i++) {
-        const item = this.file[i]
-        this.$refs.upload.post(item)
-      }
-    },
-    uploadSuccess(response, file, fileList) { // 文件上传回调 上传成功后删除待上传文件
-      // alert("response-----------"+response);
-      if (response.success === true) {
-        alert('上传成功')
-      }
-      console.log(response.status) // 后端返回数据
-      console.log(file) // 当前上传文件
-      console.log(fileList) // 整个input file 里的文件数组
-    },
+					},
+					zoomchange(e) {
 
-    createData() {
-      this.$refs['ruleForm'].validate((valid) => {
-        if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.status = this.createstatus
-          console.log(tempData)
-          createBasicdata(tempData).then(() => {
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
-              type: 'success',
-              duration: 2000
-            })
-          })
-        }
-      })
-      this.refreshData()
-    },
-    // submit files form
-    onSaveFormSubmit() {
-      this.$refs['ruleForm'].validate((valid) => {
-        if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          submitFilesManageForm(tempData).then(() => {
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Update Successfully',
-              type: 'success',
-              duration: 2000
-            })
-          })
-          // this.refreshData();
-        }
-      })
-    }
+					}
+				},
+				// 插件
+				plugin: [{
+						pName: 'Geolocation',
+						events: {
+							init(o) {
+								// o 是高德地图定位插件实例
+								o.getCurrentPosition((status, result) => {
+									if(result && result.position) {
+										self.lng = result.position.lng;
+										self.lat = result.position.lat;
+										self.center = [self.lng, self.lat];
+										self.loaded = true;
+									}
+								});
+							}
+						}
+					},
+					{
+						pName: 'MapType',
+						defaultType: 0,
+						events: {
+							init(instance) {
+								console.log(instance);
+							}
+						}
+					},
+					{
+						pName: 'ToolBar',
+						events: {
+							init(instance) {
+								console.log(instance);
+							}
+						}
+					}
+				],
 
-  }
+				listLoading: false,
+				listQuery: {
+					page: 1,
+					name: undefined,
+					code: undefined
+				},
+				statusOptions: ['published', 'draft', 'deleted'],
+				showReviewer: false,
+				temp: {
+					mapposition: undefined,
+					mapgrade: undefined,
+					happenposition: undefined,
+					issuetype: undefined,
+					issueorig: undefined,
+					filesnum: undefined,
+					name: undefined,
+					region: undefined,
+					date1: undefined,
+					date2: undefined,
+					delivery: false,
+					type: [],
+					resource: undefined,
+					desc: undefined
 
-}
+				},
+				manageDpat: {
+					id: undefined,
+					name: undefined,
+					person: undefined,
+					job: undefined,
+					tel: ''
+				},
+				owerDpat: {
+					id: undefined,
+					name: undefined,
+					person: undefined,
+					job: undefined,
+					tel: ''
+				},
+				dialogFormVisible: false,
+				dialogStatus: 'create',
+				textMap: {
+					update: '编辑监测点信息',
+					create: '创建监测点'
+				},
+				dialogPvVisible: false,
+				pvData: [],
+				rules: {
+					code: [{
+						required: true,
+						message: '监测点编码不能为空',
+						trigger: 'blur'
+					}],
+					name: [{
+						required: true,
+						message: '监测点名称不能为空',
+						trigger: 'blur'
+					}],
+					location: [{
+						required: true,
+						message: '地图定位不能为空',
+						trigger: 'blur'
+					}],
+					categoryId: [{
+						required: true,
+						message: '类别不能为空',
+						trigger: 'blur'
+					}]
+				},
+				downloadLoading: false,
+				file:[],
+				tableData: [{
+					name: 'aaa.jpg',
+					type: 'image/jpeg',
+					keyID: 123479
+				}, {
+					name: 'bbb.jpg',
+					type: 'image/jpeg',
+					keyID: 987654
+				}], // 总文件List
+				uploadFile: [] // 需要上传的文件List
+			}
+		},
+		created() {
+			let that = this
+			this.getHeight(),
+				window.onresize = function() {
+					var h = window.innerHeight;
+					console.log(h)
+					that.contentStyleObj.height = (h - 154) + 'px';
+				}
+			var newsID = this.$route.query.id;
+			console.log(newsID)
+		},
+		methods: {
+			getHeight() {
+				var h = window.innerHeight;
+				console.log(h)
+				this.contentStyleObj.height = (h - 154) + 'px';
+			},
+			manageChange(event) {
+				for(var i = 0; i < department.length; i++) {
+					if(department[i].id == event) {
+						this.manageDpat = department[i]
+					}
+				}
+			},
+			owerChange(event) {
+				for(var i = 0; i < department.length; i++) {
+					if(department[i].id == event) {
+						this.owerDpat = department[i]
+					}
+				}
+			},
+			resetTemp() {
+				this.temp = {
+						mapposition: undefined,
+						mapgrade: undefined,
+						happenposition: undefined,
+						issuetype: undefined,
+						issueorig: undefined,
+						filesnum: undefined,
+						name: undefined,
+						region: undefined,
+						date1: undefined,
+						date2: undefined,
+						delivery: false,
+						type: [],
+						resource: undefined,
+						desc: undefined
+					},
+					this.manageDpat = {
+						id: undefined,
+						name: undefined,
+						person: undefined,
+						job: undefined,
+						tel: ''
+					},
+					this.owerDpat = {
+						id: undefined,
+						name: undefined,
+						person: undefined,
+						job: undefined,
+						tel: ''
+					}
+			},
+			handleCreate() {
+				this.resetTemp()
+				this.dialogStatus = 'create'
+				this.dialogFormVisible = true
+				this.$nextTick(() => {
+					this.$refs['dataForm'].clearValidate()
+				})
+			},
+			createData() {
+				this.$refs['dataForm'].validate((valid) => {
+					if(valid) {
+						console.log(this.temp)
+						createdata(this.temp).then(() => {
+							this.list.unshift(this.temp)
+							this.dialogFormVisible = false
+							this.$notify({
+								title: 'Success',
+								message: 'Created Successfully',
+								type: 'success',
+								duration: 2000
+							})
+							this.closeWindow('/basicData/ceshi');
+						})
 
+					}
+				})
+
+			},
+			handleUpdate(row) {
+				console.log(row)
+				this.temp = Object.assign({}, row)
+				//获取主管部门数据
+				var mid = row.manageDeptId
+				for(var j = 0; j < department.length; j++) {
+					if(department[j].id == mid) {
+						this.manageDpat = department[j];
+					}
+				}
+				//获取权属部门数据
+				var oid = row.owershipId
+				for(var i = 0; i < department.length; i++) {
+					if(department[i].id == oid) {
+						this.owerDpat = department[i];
+					}
+				}
+				this.dialogStatus = 'update'
+				this.dialogFormVisible = true
+				this.$nextTick(() => {
+					this.$refs['dataForm'].clearValidate()
+				})
+			},
+			updateDatas() {
+				this.$refs['dataForm'].validate((valid) => {
+					if(valid) {
+						const tempData = Object.assign({}, this.temp)
+						console.log(tempData)
+						for(var i = 0; i < mpointType.length; i++) {
+							if(tempData.categoryId == mpointType[i].display_name) {
+								tempData.categoryId = mpointType[i].key;
+							}
+						}
+
+						updateData(tempData).then(() => {
+							this.dialogFormVisible = false
+							this.$notify({
+								title: 'Success',
+								message: 'Update Successfully',
+								type: 'success',
+								duration: 2000
+							})
+						})
+					}
+				})
+			},
+
+			//获取地图信息
+			getPoint() {
+				this.getpoint = true;
+				if(this.btnpoint == "定位") {
+					this.btnpoint = "确定";
+				} else {
+					this.btnpoint = "定位"
+					var arr = this.newpoint.join(",");
+					this.temp.location = arr;
+					this.getpoint = false;
+				}
+			},
+			getLevel() {
+				console.log("zoom")
+				this.temp.level = this.zoom;
+			},
+
+			closeWindow(paths) {
+				console.log(paths)
+				const view = {
+					fullPath: '/basicData/ceshi',
+					path: paths,
+					name: '创建',
+					title: '创建'
+				}
+				this.$store.dispatch('tagsView/delCachedView', view).then(() => {
+					const {
+						fullPath
+					} = view
+					this.$nextTick(() => {
+						this.$router.replace({
+							path: '/redirect' + fullPath
+						})
+					})
+				})
+			},
+			handleUpload(file) { // 保存需要上传的文件
+				const keyID = Math.random().toString().substr(2)
+				file['keyID'] = keyID
+				this.file.push(file)
+				console.log(this.file)
+				this.uploadFile.push(file)
+				return false
+			},
+			delectFile(keyID) { // 删除文件
+				this.file = this.file.filter(item => {
+					return item.keyID != keyID
+				})
+				this.uploadFile = this.uploadFile.filter(item => {
+					return item.keyID != keyID
+				})
+			},
+			upload() { // 上传文件
+				if(this.uploadFile.length === 0) {
+					this.$Message.error('未选择上传文件')
+					return false
+				}
+				for(let i = 0; i < this.uploadFile.length; i++) {
+					const item = this.file[i]
+					this.$refs.upload.post(item)
+				}
+			},
+			uploadSuccess(response, file, fileList) { // 文件上传回调 上传成功后删除待上传文件
+				if(response.success === true) {
+					alert('上传成功')
+				}
+				console.log(response.status) // 后端返回数据
+				console.log(file) // 当前上传文件
+				console.log(fileList) // 整个input file 里的文件数组
+			}
+		}
+	}
 </script>
-
-<style>
-  .app-container {
-    width: 100%;
-    height: 100%;
-    left: 5px;
-    top: 2px;
-  }
-
-  .ba_right {
-    float: right;
-    width: 60%;
-    height: 100%;
-    padding-left: 10px;
-  }
-
-  .ba_left {
-
-    float: left;
-    width: 40%;
-    height: 100%;
-    display: flex;
-    background: #ffffff;
-
-  }
-
-  .vertical_left {
-    width: 99%;
-    float: left;
-  }
-
-  .boards {
-    width: 2px;
-    height: 100%;
-    float: left;
-    background: #304156;
-    margin-top: -20px;
-  }
-
-  .filesFormClass {
-    top: 10px;
-    left: 10px;
-    position: absolute;
-    float: left;
-    width: 40%;
-    height: 100%;
-    display: block;
-    background: #ff00ff;
-    z-index: 200;
-  }
-
-  .files-form-class {
-    top: 15px;
-    left: 10px;
-    position: absolute;
-
-    float: left;
-    width: 40%;
-    height: 100%;
-    display: flex;
-    background: #ffffff;
-    overflow: hidden;
-    margin: 0 auto;
-
-  }
-
-  .files-form-class.el-form-item span {
-    font-size: 12px;
-    color: #000000;
-
-  }
-
-  .svg-container {
-    top: 5px;
-    left: 5px;
-    padding: 6px 5px 6px 15px;
-    vertical-align: middle;
-    width: 30px;
-    display: inline-block;
-  }
-
-  .filesnumber {
-
-    width: 100%;
-    top: 5px;
-  }
-
-  .issuefrom {
-    width: 100%;
-    float: right;
-
-  }
-
-  .filesFirstNum {
-    width: 100%;
-    display: inline-block;
-    height: 30px;
-  }
-
-  .issuetype {
-    width: 100%;
-    display: block;
-    height: 30px;
-
-  }
-
-  .happenposition {
-    width: 100%;
-    height: 30px;
-    margin: 5px;
-  }
-
-  .mapgrade {
-    width: 100%;
-    display: inline-block;
-    height: 30px;
-  }
-
-  .mapgradeleft {
-    width: 50%;
-    height: 30px;
-    display: inline-block;
-    float: left;
-  }
-
-  .mapgraderight {
-    width: 50%;
-    height: 30px;
-    display: inline-block;
-    float: right;
-  }
-
-  .getgrade {
-    float: left;
-    display: inline-block;
-    height: 38px;
-    margin-left: 4px;
-  }
-
-  .getpos {
-    float: right;
-    display: inline-block;
-    height: 38px;
-    margin-left: 4px;
-  }
-
-  .flowarea {
-    width: 100%;
-    margin: 5px 0;
-    display: block;
-    height: 30px;
-    padding: 0 2px 0 3px;
-  }
-
-  .filesSecondNumb {
-    width: 100%;
-    display: inline-block;
-    margin: 2px 0;
-    height: 30px;
-
-  }
-
-  .filesFiveDesc {
-    width: 100%;
-    display: block;
-    margin: 2px 0;
-    display: block;
-    height: 50px;
-  }
-
-  .infodesc {
-    display: inline-block;
-    width: 100%;
-    height: 100px;
-  }
-
-  .filesSixAddition {
-    border: solid 1px #000000;
-    width: 100%;
-    height: 150px;
-    display: block;
-    float: left;
-  }
-
-  .filesThridName {
-    width: 100%;
-    display: inline-block;
-    margin: 2px 0;
-    height: 30px;
-  }
-
-  .filesFourthTel {
-    width: 100%;
-    display: inline-block;
-    margin: 2px 0;
-    height: 30px;
-
-  }
-
-  .addsub {
-    display: block;
-    float: left;
-    font-size: 12px;
-    color: #0a76a4;
-
-  }
-
-  .selectFileSubmit {
-
-    text-align: center;
-    width: 98%;
-    display: inline-block;
-  }
-
-  .submitclass {
-    width: 100%;
-    text-align: center;
-    display: inline-block;
-
-  }
-
+<style type="text/css">
+	.el-dialog__wrapper {
+		display: flex;
+		align-items: center;
+	}
+	
+	.el-form-item__label {
+		padding: 0;
+	}
+	
+	.el-dialog__header {
+		padding: 20px;
+		background: #1890ff;
+	}
+	
+	.el-dialog__title {
+		color: white;
+	}
+	
+	.el-dialog__body {
+		padding: 10px 20px;
+	}
+	
+	.el-dialog__headerbtn .el-dialog__close {
+		color: white;
+	}
+	
+	.el-dialog__headerbtn .el-dialog__close:hover {
+		color: #909399;
+	}
+	
+	.el-margin-bottom {
+		margin-bottom: 5px;
+	}
 </style>

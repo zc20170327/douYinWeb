@@ -1,6 +1,6 @@
 <template>
 	<div class="app-container" style="display: flex;padding-bottom: 0;">
-		<div class="ba_left" style="width: 30%;">
+		<div class="ba_left">
 			<div class="filter-container">
 			</div>
 			<el-table :data="listdata" border style="width: 100%;">
@@ -198,6 +198,7 @@
 	
 	.ba_left {
 		float: left;
+		width: 30%;
 		height: 100%;
 		padding-right: 20px;
 		display: block;

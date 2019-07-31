@@ -23,7 +23,7 @@ import * as filters from './filters' // global filters
  * 案卷管理中的上传图片文件使用iview组件
  */
 import iView from 'iview'  //导入iview-ui
-// import 'iview/dist/styles/iview.css'//导入iview.css
+import 'iview/dist/styles/iview.css'//导入iview.css
 Vue.use(iView);
 
 

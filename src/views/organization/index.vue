@@ -1,5 +1,5 @@
 <template>
-	<div class="app-container" style="display: flex;padding-bottom: 0;">
+	<div class="app-container" style="display: flex;">
 		<div class="ba_left">
 			<div class="vertical_left">
 				<div>
@@ -15,8 +15,8 @@
 					新建基础数据
 				</el-button>
 			</div>
-			<el-table :data="listData" border style="width: 100%;">
-				<el-table-column label="序号" prop="id" align="center" width="100">
+			<el-table :data="list" border style="width: 100%;" @sort-change="sortChange">
+				<el-table-column label="序号" prop="id" sortable="custom" align="center" width="100">
 					<template slot-scope="scope">
 						<span>{{ scope.row.id }}</span>
 					</template>
@@ -55,7 +55,7 @@
 
 			<pagination v-show="total>0" :total="total" :page.sync="listQuery.pageIndex" @pagination="getList" />
 			<!--弹出框-->
-			<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%" top="0">
+			<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" style="margin: auto;">
 				<el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
 					<el-form-item label="上级" prop="parentId">
 						<el-input v-model="parentName" disabled="disabled" />
@@ -71,7 +71,7 @@
 					</el-form-item>
 
 					<el-form-item label="" style="margin-top: -20px;">
-						<el-checkbox label="是否启用" name="" @change="getstatus" v-model="temp.status"></el-checkbox>
+						<el-checkbox label="是否启用" name="" @change="getstatus" checked="checked"></el-checkbox>
 					</el-form-item>
 
 				</el-form>
@@ -89,7 +89,7 @@
 	</div>
 </template>
 <script>
-	import { fetchList, deleteBasidata, createBasicdata, getTreeDatas, getIdlist, updateData } from '@/api/organization'
+	import { fetchList, deleteBasidata, createBasicdata, getTreeDatas, getIdlist, updateData } from '@/api/basic-data'
 	import Pagination from '@/components/Pagination'
 	export default {
 		components: {
@@ -137,13 +137,6 @@
 					}
 					]
 				}],
-				listData:[
-					{id:1,code:100123,name:'技术中心',status:1},
-					{id:1,code:100123,name:'技术中心',status:1},
-					{id:1,code:100123,name:'技术中心',status:1},
-					{id:1,code:100123,name:'技术中心',status:1},
-					{id:1,code:100123,name:'技术中心',status:1}
-				],
 				contentStyleObj: {
 					height: ''
 				},
@@ -209,12 +202,7 @@
 		created() {
 			this.getList(),
 				this.getHeight(),
-				window.onresize = function() {
-					var h = window.innerHeight;
-					console.log(h)
-					that.contentStyleObj.height = (h - 84) + 'px';
-				}
-//				this.getTreeData()
+				this.getTreeData()
 		},
 		methods: {
 			//	//读取表格数据
@@ -316,11 +304,6 @@
 			},
 			//  编辑
 			handleUpdate(row) {
-				if(row.status==1){
-					row.status = true;
-				}else{
-					row.status = false;
-				}
 				this.temp = Object.assign({}, row) // copy obj
 				this.dialogStatus = 'update'
 				this.dialogFormVisible = true
@@ -379,8 +362,7 @@
 			},
 			//获取分割线高度
 			getHeight() {
-				var h = window.innerHeight;
-				this.contentStyleObj.height = (h - 84) + 'px';
+				this.contentStyleObj.height = window.innerHeight + 'px';
 			},
 			//选择状态
 			getstatus(event) {
@@ -471,6 +453,15 @@
 					type: 'success'
 				})
 				row.status = status
+			},
+			sortChange(data) {
+				const {
+					prop,
+					order
+				} = data
+				if(prop === 'id') {
+					this.sortByID(order)
+				}
 			}
 
 		}

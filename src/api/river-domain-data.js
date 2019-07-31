@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/basins',
+    url: '/GET/basins',
     method: 'get',
 	  params: query
   })
@@ -10,14 +10,15 @@ export function fetchList(query) {
 //获取树
 export function getTreeDatas(query) {
   return request({
-    url: '/basins/nodes',
+    url: '/GET/basins/nodes',
     method: 'get'
+	  
   })
 }
 //根据id获取
-export function getIdData(id) {
+export function getIdlist(id) {
   return request({
-    url: '/basins/'+id,
+    url: '/GET/basins/'+id,
     method: 'get',
     params: { id }
   })
@@ -26,7 +27,7 @@ export function getIdData(id) {
 //编辑
 export function updateData(data) {
   return request({
-    url: '/basins',
+    url: '/PUT/basins',
     method: 'put',
     data
   })
@@ -34,7 +35,7 @@ export function updateData(data) {
 //创建
 export function createdata(data) {
   return request({
-    url: '/basins',
+    url: '/POST/basins',
     method: 'post',
     data
   })
@@ -43,7 +44,7 @@ export function createdata(data) {
 //删除
 export function deleteBasidata(id) {
   return request({
-    url: '/basins/'+id,
+    url: '/DELETE/basins/'+id,
     method: 'delete'
   })
 }

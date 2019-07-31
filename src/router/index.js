@@ -45,7 +45,7 @@ export const constantRoutes = [
     hidden: true,
     children: [
       {
-        path: '/redirect/:path*', 
+        path: '/redirect/:path*',
         component: () => import('@/views/redirect/index')
       }
     ]
@@ -97,7 +97,6 @@ export const constantRoutes = [
       }
     ]
   }
-  
 ]
 
 /**
@@ -216,48 +215,67 @@ export const asyncRoutes = [
     meta: { title: '业务管理', icon: 'list' },
     children: [
       {
-        path: 'index',
+        path: 'filesRecord',
         component: () => import('@/views/filesManagement/filesRecord/index'),
+//      component: () => import('@/views/filesManagement/filesRecord/filesRecord'),
         name: '案卷登记',
         meta: { title: '案卷登记' }
+      },
+      {
+        path: 'filesListtable',
+        component: () => import('@/views/filesManagement/filesListTable/filesListtable'),
+        name: '案卷列表',
+        meta: { title: '案卷列表' }
+      },
+      {
+        path: 'allfiles',
+        component: () => import('@/views/filesManagement/allFiles/allfiles'),
+        name: '所有案卷',
+        meta: { title: '所有案卷' }
+      },
+//       children: [
+//   {
+//     path: 'allfilesDetailsInfo',
+//     component: () => import('@/views/filesManagement/allFiles/components/allfilesDetailsInfo'),
+//     name: '案卷详情',
+//     meta: { title: '案卷详情' }
+//   },
+// ],
+
+      {
+        path: 'filesforhandle',
+        component: () => import('@/views/filesManagement/filesForWaitingHandle/filesforhandle'),
+        name: '待办案卷',
+        meta: { title: '待办案卷' }
+      },
+      {
+        path: 'filesforsending',
+        component: () => import('@/views/filesManagement/filesForSending/filesforsending'),
+        name: '已派案卷',
+        meta: { title: '已派案卷' }
+      },
+      {
+        path: 'filesforfinished',
+        component: () => import('@/views/filesManagement/filesForFinished/filesforfinished'),
+        name: '已办案卷',
+        meta: { title: '已办案卷' }
+      },
+      {
+        path: 'fileProcessing',
+        component: () => import('@/views/filesManagement/fileProcessing/index'),
+        name: '案卷处理',
+        meta: { title: '案卷处理' }
       }
-//    {
-//      path: 'index',
-//      component: () => import('@/views/filesManagement/filesListTable/index'),
-//      name: '案卷列表',
-//      meta: { title: '案卷列表' }
-//    },
-//    {
-//      path: 'index',
-//      component: () => import('@/views/filesManagement/allFiles/index'),
-//      name: '所有案卷',
-//      meta: { title: '所有案卷' }
-//    },
-//    {
-//      path: 'index',
-//      component: () => import('@/views/filesManagement/filesForWaitingHandle/index'),
-//      name: '待办案卷',
-//      meta: { title: '待办案卷' }
-//    },
-//    {
-//      path: 'index',
-//      component: () => import('@/views/filesManagement/filesForSending/index'),
-//      name: '已派案卷',
-//      meta: { title: '已派案卷' }
-//    },
-//    {
-//      path: 'index',
-//      component: () => import('@/views/filesManagement/filesForFinished/index'),
-//      name: '已办案卷',
-//      meta: { title: '已办案卷' }
-//    }
 
     ]
   },
 
+
+
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
+
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support

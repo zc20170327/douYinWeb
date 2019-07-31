@@ -1,278 +1,453 @@
 <template>
-	<div class="app-container" style="display: flex;">
-		<div class="ba_left">
-			<div class="vertical_left">
-				<div>
-					<el-tree :data="data2" node-key="id" ref="tree" highlight-current @current-change="getCheckedNodes" :props="defaultProps">
-					</el-tree>
-				</div>
-			</div>
-		</div>
-		<div class="boards" :style="contentStyleObj"></div>
-		<div class="ba_right">
-			<div class="filter-container">
-				<el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-					新建基础数据
-				</el-button>
-				<!--<router-link :to="{path:'/basicData/toDetail',query:{id:0}}">
-          		<el-button class="filter-item" style="margin-left: 10px;" type="primary">
-					页面跳转
-				</el-button>
-        </router-link>-->
-				
-			</div>
-			<el-table :data="listData" border style="width: 100%;">
-				<el-table-column label="序号" prop="id" align="center" width="100">
-					<template slot-scope="scope">
-						<span>{{ scope.row.id }}</span>
-					</template>
-				</el-table-column>
-				<el-table-column label="编码" width="150px" align="center">
-					<template slot-scope="scope">
-						<span>{{ scope.row.code}}</span>
-					</template>
-				</el-table-column>
-				<el-table-column label="名称" width="250px" align="center">
-					<template slot-scope="scope">
-						<span class="link-type">{{ scope.row.name }}</span>
-					</template>
-				</el-table-column>
-				<el-table-column label="状态" class-name="status-col" width="200">
-					<template slot-scope="{row}">
-						<el-tag :type="row.status | statusFilter" @click="changestatus(row)" style="cursor: pointer;">
-							{{ row.status ==1?"启用":"未启用"}}
-						</el-tag>
-					</template>
-				</el-table-column>
-				<el-table-column label="操作" width="230" align="center" class-name="small-padding fixed-width">
-					<template slot-scope="{row}">
-						<!--<el-button v-if="row.status!='deleted'" size="mini" type="defalt" @click="getDetailData(row)">
-							查看
-						</el-button>-->
-						<!--<router-link :to="'/basicData/toDetail/'+row.id">{path:'/basicData/toDetail',query:{id:0}}"-->
-						<router-link :to="{path:'/basicData/toDetail',query:{id:row.id}}">
-						<el-button type="primary" size="mini" @click="handleUpdate(row)">
-							编辑
-						</el-button>
-						</router-link>
-						<el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handledelete(row)">
-							删除
-						</el-button>
-					</template>
-				</el-table-column>
-				<el-table-column label="" min-width="30" align="center">
-				</el-table-column>
-			</el-table>
+	<div class="app-container">
 
-			<pagination v-show="total>0" :total="total" :page.sync="listQuery.pageIndex" @pagination="getList" />
-			<!--弹出框-->
-			<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="40%" top="0">
-				<el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-					<el-form-item label="上级" prop="parentId">
-						<el-input v-model="parentName" disabled="disabled" />
-					</el-form-item>
-					<el-form-item label="名称" prop="name">
-						<el-input v-model="temp.name" />
-					</el-form-item>
-					<el-form-item label="编码" prop="code">
-						<el-input v-model="temp.code" />
-					</el-form-item>
-					<el-form-item label="备注">
-						<el-input v-model="temp.description" :autosize="{ minRows: 4, maxRows: 4}" type="textarea" placeholder="备注" />
-					</el-form-item>
+		<div class="dialogBox" style="display: flex;" :style="contentStyleObj">
+			<!--表单-->
+			<div style="width: 40%;overflow:auto;border: 1px solid gainsboro;padding:20px 10px;">
+				<el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px">
+					<div id="" style="padding: 0 10px;">
+						<el-row :gutter="10">
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="监测点编码:" label-width="85px" prop="code">
+									<el-input v-model="temp.code"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="监测点名称:" prop="name" label-width="85px">
+									<el-input v-model="temp.name"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row :gutter="10">
+							<el-col :span="9" :xs="18" :sm="18" :md="18" :lg="18" :xl="9">
+								<el-form-item label="地图等级：" label-width="85px">
+									<el-input v-model="temp.level" :disabled="true"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="3" :xs="6" :sm="6" :md="6" :lg="6" :xl="3">
+								<el-button type="primary" @click="getLevel()" style="width: 100%;padding: 10px 10px;">{{btnclevel}}</el-button>
+							</el-col>
 
-					<el-form-item label="" style="margin-top: -20px;">
-						<el-checkbox label="是否启用" name="" @change="getstatus" v-model="temp.status"></el-checkbox>
-					</el-form-item>
+							<el-col :span="9" :xs="18" :sm="18" :md="18" :lg="18" :xl="9">
+								<el-form-item label="地图定位：" prop="location" label-width="85px">
+									<el-input v-model="temp.location" @click="getPoint()" :disabled="true"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="3" :xs="6" :sm="6" :md="6" :lg="6" :xl="3">
+								<el-button type="primary" @click="getPoint()" style="width: 100%;padding: 10px 10px;">{{btnpoint}}</el-button>
+							</el-col>
+						</el-row>
+
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="类别：" prop="categoryId" label-width="85px">
+									<el-select v-model="temp.categoryId" placeholder="选择监测点类型" class="filter-item" style="width: 100%">
+										<el-option v-for="item in mpointType" :key="item.key" :label="item.display_name" :value="item.key" />
+									</el-select>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="地址：" label-width="85px">
+									<el-input v-model="temp.address"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="位置描述：" label-width="85px">
+									<el-input v-model="temp.description"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="省网代码：" label-width="85px">
+									<el-input v-model="temp.networkCode"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+					</div>
+					<div id="" style="border: 1px solid gainsboro;padding: 0 10px;">
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="主管部门：" label-width="85px" class="el-margin-bottom">
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row :gutter="10">
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="部门名称：" label-width="85px" class="el-margin-bottom">
+									<el-select v-model="temp.manageDeptId" placeholder="选择部门" @change="manageChange" class="filter-item" style="width: 100%">
+										<el-option v-for="item in department" :key="item.id" :label="item.name" :value="item.id" />
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="负责人:" label-width="85px" class="el-margin-bottom">
+									<el-input v-model="manageDpat.person"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+
+						<el-row :gutter="10">
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="职务：" label-width="85px" class="el-margin-bottom">
+									<el-input v-model="manageDpat.job"></el-input>
+								</el-form-item>
+							</el-col>
+
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="联系电话：" label-width="85px" class="el-margin-bottom">
+									<el-input v-model="manageDpat.tel"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+
+					</div>
+					<div id="" style="border: 1px solid gainsboro;padding: 0 10px;margin: 10px 0;">
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="权属部门：" label-width="85px" class="el-margin-bottom">
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row :gutter="10">
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="部门名称：" label-width="85px" class="el-margin-bottom">
+									<el-select v-model="temp.owershipId" placeholder="选择部门" @change="owerChange" class="filter-item" style="width: 100%">
+										<el-option v-for="item in department" :key="item.id" :label="item.name" :value="item.id" />
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="负责人:" label-width="85px" class="el-margin-bottom">
+									<el-input v-model="owerDpat.person"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+
+						<el-row :gutter="10">
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="职务：" label-width="85px" class="el-margin-bottom">
+									<el-input v-model="owerDpat.job"></el-input>
+								</el-form-item>
+							</el-col>
+
+							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+								<el-form-item label="联系电话：" label-width="85px" class="el-margin-bottom">
+									<el-input v-model="owerDpat.tel"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+					</div>
+					<div id="" style="border: 1px solid gainsboro;padding: 0 10px;margin: 10px 0;">
+						<el-row>
+							<el-col :span="24">
+								<el-form-item label="上传附件：" label-width="85px" >
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<!--<el-upload class="upload-demo" ref="upload" action="https://jsonplaceholder.typicode.com/posts/" :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" :auto-upload="false">
+									<el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+								</el-upload>-->
+
+						</el-row>
+
+					</div>
+					<div align="right">
+						<el-button @click="closeWindow('/basicData/ceshi')">
+							取消
+						</el-button>
+						<el-button type="primary" @click="dialogStatus==='create'?createData():updateDatas()">
+							保存
+						</el-button>
+					</div>
 
 				</el-form>
-				<div slot="footer" class="dialog-footer">
-					<el-button @click="dialogFormVisible = false">
-						取消
-					</el-button>
-					<el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-						保存
-					</el-button>
-				</div>
-			</el-dialog>
 
+			</div>
+			<!--地图-->
+			<div style="width: 60%;">
+				<el-amap vid="amapDemo" :center="center" :zoom="zoom" :plugin="plugin" class="amap-demo" :events="events">
+					</el-amap-marker>
+					<el-amap-marker :position="newpoint"></el-amap-marker>
+					<el-amap-polygon v-for="(polygon, index) in polygons" :vid="index" :ref="`polygon_${index}`" :path="polygon.path" :draggable="polygon.draggable" :events="polygon.events"></el-amap-polygon>
+				</el-amap>
+
+			</div>
 		</div>
+
 	</div>
 </template>
+
 <script>
-	import { fetchList, deleteBasidata, createBasicdata, getTreeDatas, getIdlist, updateData } from '@/api/organization'
-	import Pagination from '@/components/Pagination'
+	import { fetchList, createdata, updateData } from '@/api/mpoint-management'
+
+	const mpointType = [{
+			key: 1,
+			display_name: '环保监测点'
+		},
+		{
+			key: 2,
+			display_name: '水文监测点'
+		},
+		{
+			key: 3,
+			display_name: '污染源监测点'
+		}
+	]
+	const department = [{
+			id: 0,
+			name: "部门0",
+			person: "商君0",
+			job: "职务",
+			tel: "12345678910"
+		},
+		{
+			id: 1,
+			name: "部门1",
+			person: "商君1",
+			job: "职务",
+			tel: "12345678910"
+		},
+		{
+			id: 2,
+			name: "部门2",
+			person: "商君2",
+			job: "职务",
+			tel: "12345678910"
+		},
+		{
+			id: 3,
+			name: "部门3",
+			person: "商君",
+			job: "职务",
+			tel: "12345678910"
+		}
+	]
+
 	export default {
-		components: {
-			Pagination
-		},
-		props: {
-			value: {
-				type: Boolean,
-				default: true
-			}
-		},
-		filters: {
-			statusFilter(status) {
-				const statusMap = {
-					1: 'success',
-					0: 'danger'
-				}
-				return statusMap[status]
-			},
-			typeFilter(type) {
-				return calendarTypeKeyValue[type]
-			}
-		},
+
 		data() {
+			let self = this;
 			return {
-				data2: [{
-					id: 1,
-					label: '重庆智绘点途科技有限公司',
-					children: [
-					{
-						id: 2,
-						label: '综合中心'
-					},
-					{
-						id: 3,
-						label: '技术中心'
-					},
-					{
-						id: 4,
-						label: '服务中心'
-					},
-					{
-						id: 5,
-						label: '综合中心'
-					}
-					]
-				}],
-				listData:[
-					{id:1,code:100123,name:'技术中心',status:1},
-					{id:1,code:100123,name:'技术中心',status:1},
-					{id:1,code:100123,name:'技术中心',status:1},
-					{id:1,code:100123,name:'技术中心',status:1},
-					{id:1,code:100123,name:'技术中心',status:1}
-				],
 				contentStyleObj: {
 					height: ''
 				},
-				tableKey: 0,
-				list: null,
-				treelist: null,
-				createstatus: 1,
-				total: 0,
-				parentName: "无",
-				listLoading: true,
-				nodeData: null,
-				listQuery: {
-					pageIndex: 1
+				mpointType,
+				department,
+				btnclevel: '获取',
+				btnpoint: '定位',
 
-				},
-				treeId: 0,
-				sortOptions: [{
-					label: 'ID Ascending',
-					key: '+id'
-				}, {
-					label: 'ID Descending',
-					key: '-id'
+				//地图参数
+				btnpoint: "定位",
+				btnline: "描边",
+				getpoint: false,
+				zoom: 12,
+				center: [105.935681, 29.35842],
+				address: '',
+				newpoint: [105.935681, 29.35842],
+				polygons: [{
+					draggable: false,
+					strokeColor: '409EFF',
+					strokeOpacity: 0.4,
+					path: [],
+					events: {
+						click: (e) => {
+							alert('click polygon');
+							console.log(e)
+							console.log(self.$refs.polygon_0[0].$$getPath())
+						}
+					}
 				}],
+				events: {
+					click(e) {
+						let {
+							lng,
+							lat
+						} = e.lnglat;
+						self.lng = lng;
+						self.lat = lat;
+						console.log([lng, lat])
+						if(self.getpoint) {
+							self.newpoint = [lng, lat];
+						}
+
+					},
+					zoomchange(e) {
+
+					}
+				},
+				// 插件
+				plugin: [{
+						pName: 'Geolocation',
+						events: {
+							init(o) {
+								// o 是高德地图定位插件实例
+								o.getCurrentPosition((status, result) => {
+									if(result && result.position) {
+										self.lng = result.position.lng;
+										self.lat = result.position.lat;
+										self.center = [self.lng, self.lat];
+										self.loaded = true;
+									}
+								});
+							}
+						}
+					},
+					{
+						pName: 'MapType',
+						defaultType: 0,
+						events: {
+							init(instance) {
+								console.log(instance);
+							}
+						}
+					},
+					{
+						pName: 'ToolBar',
+						events: {
+							init(instance) {
+								console.log(instance);
+							}
+						}
+					}
+				],
+
+				listLoading: false,
+				listQuery: {
+					page: 1,
+					name: undefined,
+					code: undefined
+				},
+				statusOptions: ['published', 'draft', 'deleted'],
 				showReviewer: false,
 				temp: {
-					id: 0,
-					name: '',
-					code: 0,
-					status: '',
-					description: ''
+					id: undefined,
+					code: undefined,
+					name: undefined,
+					level: undefined,
+					location: undefined,
+					categoryId: undefined,
+					address: undefined,
+					description: undefined,
+					networkCode: undefined,
+					manageDeptId: undefined,
+					owershipId: undefined,
+					attachPath: undefined
+
+				},
+				manageDpat: {
+					id: undefined,
+					name: undefined,
+					person: undefined,
+					job: undefined,
+					tel: ''
+				},
+				owerDpat: {
+					id: undefined,
+					name: undefined,
+					person: undefined,
+					job: undefined,
+					tel: ''
 				},
 				dialogFormVisible: false,
-				dialogStatus: '',
+				dialogStatus: 'create',
 				textMap: {
-					update: '编辑基础数据',
-					create: '新建基础数据',
-					getdetail: '查看基础数据'
+					update: '编辑监测点信息',
+					create: '创建监测点'
 				},
 				dialogPvVisible: false,
 				pvData: [],
 				rules: {
-					name: [{
-						required: true,
-						message: '名称不能为空',
-						trigger: 'blur'
-					}],
 					code: [{
 						required: true,
-						message: '编码不能为空',
+						message: '监测点编码不能为空',
+						trigger: 'blur'
+					}],
+					name: [{
+						required: true,
+						message: '监测点名称不能为空',
+						trigger: 'blur'
+					}],
+					location: [{
+						required: true,
+						message: '地图定位不能为空',
+						trigger: 'blur'
+					}],
+					categoryId: [{
+						required: true,
+						message: '类别不能为空',
 						trigger: 'blur'
 					}]
 				},
-				downloadLoading: false,
-				outerVisible: false,
-				innerVisible: false,
-
-				defaultProps: {
-					children: 'children',
-					label: 'label'
-				}
+				downloadLoading: false
 			}
 		},
 		created() {
-			this.getList(),
-				this.getHeight()
-//				this.getTreeData()
+			let that = this
+			this.getHeight(),
+				window.onresize = function() {
+					var h = window.innerHeight;
+					console.log(h)
+					that.contentStyleObj.height = (h - 154) + 'px';
+				}
+			var newsID=this.$route.query.id;
+			console.log(newsID)
 		},
 		methods: {
-			//读取表格数据
-			getList() {
-				this.listLoading = false
-				fetchList(this.listQuery).then(response => {
-					console.log(response)
-//					this.list = response.data.list;
-//					setTimeout(() => {
-//						this.listLoading = false
-//					}, 1.5 * 1000)
-				})
+			getHeight() {
+				var h = window.innerHeight;
+				console.log(h)
+				this.contentStyleObj.height = (h - 154) + 'px';
+			},
+			manageChange(event) {
+				for(var i = 0; i < department.length; i++) {
+					if(department[i].id == event) {
+						this.manageDpat = department[i]
+					}
+				}
+			},
+			owerChange(event) {
+				for(var i = 0; i < department.length; i++) {
+					if(department[i].id == event) {
+						this.owerDpat = department[i]
+					}
+				}
 			},
 			resetTemp() {
 				this.temp = {
-					id: undefined,
-					name: '',
-					code: undefined,
-					status: 1,
-					description: '',
-					parentId: this.treeId,
-					parentName: this.parentName
-				}
+						id: undefined,
+						code: undefined,
+						name: undefined,
+						level: undefined,
+						location: undefined,
+						categoryId: undefined,
+						address: undefined,
+						description: undefined,
+						networkCode: undefined,
+						manageDeptId: undefined,
+						owershipId: undefined,
+						attachPath: undefined
+					},
+					this.manageDpat = {
+						id: undefined,
+						name: undefined,
+						person: undefined,
+						job: undefined,
+						tel: ''
+					},
+					this.owerDpat = {
+						id: undefined,
+						name: undefined,
+						person: undefined,
+						job: undefined,
+						tel: ''
+					}
 			},
-			//改变状态
-			changestatus(row) {
-				console.log(row)
-				var statusvalue = '';
-				if(row.status == 0) {
-					statusvalue = "你确定要启用" + row.name + "？";
-				} else if(row.status == 1) {
-					statusvalue = "你确定不启用" + row.name + "？";
-				}
-				this.$confirm(statusvalue, '状态', {
-						confirmButtonText: '确定',
-						cancelButtonText: '取消',
-						type: 'warning'
-					})
-					.then(async() => {
-						console.log(row.status)
-						if(row.status == 1) {
-							row.status = 0
-						} else if(row.status == 0) {
-							row.status = 1;
-						}
-					})
-					.catch(err => {
-						console.error(err)
-					})
-			},
-
-			//创建
 			handleCreate() {
 				this.resetTemp()
 				this.dialogStatus = 'create'
@@ -284,41 +459,58 @@
 			createData() {
 				this.$refs['dataForm'].validate((valid) => {
 					if(valid) {
-						const tempData = Object.assign({}, this.temp)
-						tempData.status = this.createstatus;
-						console.log(tempData)
+						console.log(this.temp)
+						createdata(this.temp).then(() => {
+							this.list.unshift(this.temp)
+							this.dialogFormVisible = false
+							this.$notify({
+								title: 'Success',
+								message: 'Created Successfully',
+								type: 'success',
+								duration: 2000
+							})
+							this.closeWindow('/basicData/ceshi');
+						})
 						
-//						createBasicdata(tempData).then(() => {
-//							this.dialogFormVisible = false
-//							this.$notify({
-//								title: 'Success',
-//								message: 'Created Successfully',
-//								type: 'success',
-//								duration: 2000
-//							})
-//						})
 					}
 				})
-				this.refreshData();
+				
+				
 			},
-			//  编辑
 			handleUpdate(row) {
-				if(row.status==1){
-					row.status = true;
-				}else{
-					row.status = false;
+				console.log(row)
+				this.temp = Object.assign({}, row)
+				//获取主管部门数据
+				var mid = row.manageDeptId
+				for(var j = 0; j < department.length; j++) {
+					if(department[j].id == mid) {
+						this.manageDpat = department[j];
+					}
 				}
-				this.temp = Object.assign({}, row) // copy obj
+				//获取权属部门数据
+				var oid = row.owershipId
+				for(var i = 0; i < department.length; i++) {
+					if(department[i].id == oid) {
+						this.owerDpat = department[i];
+					}
+				}
 				this.dialogStatus = 'update'
 				this.dialogFormVisible = true
 				this.$nextTick(() => {
 					this.$refs['dataForm'].clearValidate()
 				})
 			},
-			updateData() {
+			updateDatas() {
 				this.$refs['dataForm'].validate((valid) => {
 					if(valid) {
 						const tempData = Object.assign({}, this.temp)
+						console.log(tempData)
+						for(var i = 0; i < mpointType.length; i++) {
+							if(tempData.categoryId == mpointType[i].display_name) {
+								tempData.categoryId = mpointType[i].key;
+							}
+						}
+
 						updateData(tempData).then(() => {
 							this.dialogFormVisible = false
 							this.$notify({
@@ -328,175 +520,80 @@
 								duration: 2000
 							})
 						})
-						this.refreshData();
 					}
 				})
 			},
-			//删除
-			handledelete(row) {
-				var statusvalue = "你确定要删除" + row.name + "数据？";
-				this.$confirm(statusvalue, '删除', {
-						confirmButtonText: '确定',
-						cancelButtonText: '取消',
-						type: 'warning'
-					})
-					.then(async() => {
-//						await deleteBasidata(row.id)
-//						this.$message({
-//							type: 'success',
-//							message: '删除成功'
-//						})
-//						this.refreshData();
-					})
-					.catch(err => {
-						console.error(err)
-					})
-			},
-			//刷新数据
-			refreshData() {
-				var data = this.nodeData;
-				return setTimeout(() => {
-					this.getTreeData();
-					if(this.treeId == 0) {
-						this.getList();
-					} else {
-						this.getCheckedNodes(data);
-					}
-				}, 1000)
-			},
-			//获取分割线高度
-			getHeight() {
-				var h = window.innerHeight;
-				this.contentStyleObj.height = (h - 84) + 'px';
-			},
-			//选择状态
-			getstatus(event) {
-				console.log(event)
-				if(event) {
-					this.createstatus = 1;
+
+			//获取地图信息
+			getPoint() {
+				this.getpoint = true;
+				if(this.btnpoint == "定位") {
+					this.btnpoint = "确定";
 				} else {
-					this.createstatus = 0;
+					this.btnpoint = "定位"
+					var arr = this.newpoint.join(",");
+					this.temp.location = arr;
+					this.getpoint = false;
 				}
-				console.log(this.createstatus)
+			},
+			getLevel() {
+				console.log("zoom")
+				this.temp.level = this.zoom;
 			},
 
-			//获取树
-			getTreeData() {
-				console.log("获取树数据");
-				this.listLoading = false
-				getTreeDatas().then(response => {
-					var treeData = this.convertToTreeData(response.data, 0)
-					this.treelist = treeData;
-					this.total = response.data.length;
-
-					setTimeout(() => {
-						this.listLoading = false
-					}, 1.5 * 1000)
-				})
-			},
-			//递归构建树的数据
-			convertToTreeData(data, pid) {
-				var result = []
-				var temp = []
-				for(var i = 0; i < data.length; i++) {
-					if(data[i].parentId == pid) {
-						var obj = {
-							'label': data[i].name,
-							'id': data[i].id,
-							'parentId': data[i].parentId
-						}
-						temp = this.convertToTreeData(data, data[i].id)
-						if(temp.length > 0) {
-							obj.children = temp
-						}
-						result.push(obj)
-					}
+			closeWindow(paths) {
+				console.log(paths)
+				const view={
+					fullPath:'/basicData/ceshi',
+					path: paths,
+					name:'创建',
+					title:'创建'
 				}
-				return result
-			},
-
-			//点击获取树节点
-			getCheckedNodes(data) {
-				this.nodeData = data;
-				this.parentName = data.label;
-				this.treeId = data.id;
-				this.getCheckNodesData(data)
-
-			},
-			getCheckNodesData(data) {
-
-				this.listLoading = false
-				var id = data.id;
-				var allListA = [];
-				var allListB = null;
-				this.listQuery = {
-					parentId: id
-				}
-				getIdlist(id).then(response => {
-					allListB = response.data;
+				this.$store.dispatch('tagsView/delCachedView', view).then(() => {
+					const {
+						fullPath
+					} = view
+					this.$nextTick(() => {
+						this.$router.replace({
+							path: '/redirect' + fullPath
+						})
+					})
 				})
-				fetchList(this.listQuery).then(response => {
-					console.log(response.data)
-					if(response.data != null) {
-						allListA = response.data.list;
-					}
-					setTimeout(() => {
-						this.listLoading = false
-					}, 1.5 * 1000)
-					allListA.unshift(allListB)
-					this.total = allListA.length;
-					this.list = allListA
-				})
-			},
-			handleFilter() {
-				this.listQuery.page = 1
-				this.getList()
-			},
-			handleModifyStatus(row, status) {
-				this.$message({
-					message: '操作Success',
-					type: 'success'
-				})
-				row.status = status
-			},
-			
-			
-			
-			
-			toCreate(paths,tid){
-				console.log(paths+tid)
-				this.$router.push({path:paths+tid})
 			}
-
 		}
 	}
 </script>
-
-<style>
-	.ba_right {
-		float: right;
-		width: 80%;
-		height: 100%;
-		padding-left: 10px;
-	}
-	
-	.ba_left {
-		float: left;
-		width: 20%;
-		height: 100%;
+<style type="text/css">
+	.el-dialog__wrapper {
 		display: flex;
+		align-items: center;
 	}
 	
-	.vertical_left {
-		width: 99%;
-		float: left;
+	.el-form-item__label {
+		padding: 0;
 	}
 	
-	.boards {
-		width: 2px;
-		height: 100%;
-		float: left;
-		background: #304156;
-		margin-top: -20px;
+	.el-dialog__header {
+		padding: 20px;
+		background: #1890ff;
+	}
+	
+	.el-dialog__title {
+		color: white;
+	}
+	
+	.el-dialog__body {
+		padding: 10px 20px;
+	}
+	
+	.el-dialog__headerbtn .el-dialog__close {
+		color: white;
+	}
+	
+	.el-dialog__headerbtn .el-dialog__close:hover {
+		color: #909399;
+	}
+	.el-margin-bottom{
+		margin-bottom: 5px;
 	}
 </style>
