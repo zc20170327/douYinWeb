@@ -15,6 +15,7 @@
 					新建流域
 				</el-button>
 			</div>
+			<div style="width: 100%;height: 400px;">
 			<el-table :data="list" border style="width: 100%;" @sort-change="sortChange">
 				<el-table-column label="序号" prop="id" sortable="custom" align="center" width="100">
 					<template slot-scope="scope">
@@ -36,7 +37,7 @@
 						<span class="link-type">{{ scope.row.type }}</span>
 					</template>
 				</el-table-column>
-				<el-table-column label="操作" min-width="230" class-name="small-padding fixed-width">
+				<el-table-column label="操作" width="250" align="center">
 					<template slot-scope="{row}">
 						<el-button v-if="row.status!='deleted'" size="mini" type="defalt" @click="handleUpdate(row,'look')">
 							查看
@@ -49,8 +50,10 @@
 						</el-button>
 					</template>
 				</el-table-column>
+				<el-table-column min-width="1">
+				</el-table-column>
 			</el-table>
-
+			</div>
 			<pagination v-show="total>0" :total="total" :page.sync="listQuery.pageIndex" @pagination="getList" />
 			<!--弹出框-->
 			<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisibles" top="0" width="60%">
@@ -312,7 +315,7 @@
 				textMap: {
 					update: '编辑流域信息',
 					create: '新建流域信息',
-					getdetail: '查看流域信息'
+					look: '查看流域信息'
 				},
 				dialogPvVisible: false,
 				pvData: [],
@@ -468,6 +471,7 @@
 			}
 		},
 		created() {
+			let that = this
 			this.getList(),
 				this.getHeight(),
 				this.getTreeData(),
@@ -556,6 +560,8 @@
 				}
 				var tid=row.id;
 				getIdData(tid).then(response=>{
+					
+					console.log(response)
 					this.temp = response.data
 					var points = response.data.point.split(",");
 					this.newpoint = points;

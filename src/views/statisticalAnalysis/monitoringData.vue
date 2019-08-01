@@ -1,22 +1,25 @@
 <template>
 	<div class="app-container">
 		<div class="filter-container">
-			<el-select v-model="listQuery.importance" placeholder="监测点" clearable style="width: 150px" class="filter-item">
-				<el-option v-for="item in mpointType" :key="item.name" :label="item.name" :value="item.name" />
+			<el-row style="display: flex;">
+			<el-select v-model="listQuery.name" placeholder="监测点" clearable style="width: 150px" class="filter-item">
+				<el-option v-for="item in pointsList" :key="item.id" :label="item.name" :value="item.name" />
 			</el-select>
-			<el-select v-model="listQuery.importance" placeholder="指标" clearable style="width: 150px" class="filter-item">
-				<el-option v-for="item in targetType" :key="item.target" :label="item.target" :value="item.target" />
-			</el-select>
-			<!--<el-date-picker v-model="temp.timestamp" type="datetime" placeholder="监测起始时间" align="top"/>
-			<el-date-picker v-model="temp.timestamp" type="datetime" placeholder="监测结束时间" />-->
+			<!--<el-select v-model="listQuery.quota" placeholder="指标" clearable style="width: 150px" class="filter-item">
+				<el-option v-for="item in targetTypes" :key="item.key" :label="item.name" :value="item.name" />
+			</el-select>-->
+			<el-date-picker v-model="listQuery.start_time" type="datetime" placeholder="监测起始时间" style="width: 150px;margin: 0 10px;"/>
+			<el-date-picker v-model="listQuery.end_time" type="datetime" placeholder="监测结束时间"  style="width: 150px;margin-right: 10px;"/>
 			<el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
 				查询
 			</el-button>
 			<el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
 				创建监测点
 			</el-button>
+			</el-row>
 		</div>
-		<el-table :key="tableKey" v-loading="listLoading" :data="listdata" border fit highlight-current-row style="width: 100%;">
+		<div style="width: 100%;height: 400px;">
+		<el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
 			<el-table-column label="序号" prop="id" align="center" width="80">
 				<template slot-scope="scope">
 					<span>{{ scope.row.id }}</span>
@@ -24,7 +27,7 @@
 			</el-table-column>
 			<el-table-column label="监测点" width="150px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.name}}</span>
+					<span>{{ scope.row.pointInfo.name}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="监测时间" width="150px" align="center">
@@ -34,28 +37,28 @@
 			</el-table-column>
 			<el-table-column label="指标" width="150px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.target }}</span>
+					<span>{{ scope.row.quota }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="检测值" width="100px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.mvalue }}</span>
+					<span>{{ scope.row.monitor_value }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="标准值" width="100px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.svalue }}</span>
+					<span>{{ scope.row.standard_value }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="单位" width="100px" align="center">
 				<template slot-scope="scope">
-					<span>{{ scope.row.company }}</span>
+					<span>{{ scope.row.unit }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="是否达标" class-name="status-col" width="100px">
 				<template slot-scope="{row}">
-					<el-tag :type="row.status | statusFilter" style="cursor: pointer;">
-						{{ row.status ==1?"是":"否"}}
+					<el-tag :type="row.is_qualified=='是'?'success':'danger'">
+						{{ row.is_qualified}}
 					</el-tag>
 				</template>
 			</el-table-column>
@@ -75,10 +78,13 @@
 				</template>
 			</el-table-column>
 			<el-table-column label="">
+				<template slot-scope="{row}">
+					<span class="link-type"></span>
+				</template>
 			</el-table-column>
 		</el-table>
-
-		<pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+		</div>
+		<pagination v-show="total>0" :total="total" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.limit" @pagination="getList" />
 
 		<!--弹出框-->
 		<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" top="0" width="50%">
@@ -89,16 +95,16 @@
 						<div id="" style="padding: 0 10px;">
 							<el-row :gutter="10">
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="监测点：" prop="name" label-width="85px">
-										<el-select v-model="temp.name" placeholder="选择监测点" class="filter-item" style="width: 100%">
-											<el-option v-for="item in mpointType" :key="item.key" :label="item.name" :value="item.key" />
+									<el-form-item label="监测点：" prop="pointId" label-width="85px">
+										<el-select v-model="temp.pointId" placeholder="选择监测点" class="filter-item" style="width: 100%">
+											<el-option v-for="item in pointsList" :key="item.id" :label="item.name" :value="item.id" />
   									</el-select>
 									</el-form-item>
 								</el-col>
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="指标：" prop="target" label-width="85px">
-										<el-select v-model="temp.target" placeholder="选择指标" class="filter-item" style="width: 100%">
-											<el-option v-for="item in targetType" :key="item.key" :label="item.target" :value="item.key" />
+									<el-form-item label="指标：" prop="quota" label-width="85px">
+										<el-select v-model="temp.quota" placeholder="选择指标" class="filter-item" style="width: 100%">
+											<el-option v-for="item in targetTypes" :key="item.key" :label="item.name" :value="item.name" />
   									</el-select>
 									</el-form-item>
 								</el-col>
@@ -110,35 +116,35 @@
 									</el-form-item>
 								</el-col>
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="检测值:" prop="mvalue" label-width="85px">
-										<el-input v-model="temp.mvalue"></el-input>
+									<el-form-item label="检测值:" prop="monitor_value" label-width="85px">
+										<el-input v-model="temp.monitor_value"></el-input>
 									</el-form-item>
 								</el-col>
 							</el-row>
 							<el-row :gutter="10">
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="标准值:" prop="svalue" label-width="85px">
-										<el-input v-model="temp.svalue"></el-input>
+									<el-form-item label="标准值:" prop="standard_value" label-width="85px">
+										<el-input v-model="temp.standard_value"></el-input>
 									</el-form-item>
 								</el-col>
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="单位：" prop="company" label-width="85px">
-										<el-select v-model="temp.company" placeholder="选择单位" class="filter-item" style="width: 100%">
-											<el-option v-for="item in companyType" :key="item.key" :label="item.company" :value="item.key" />
+									<el-form-item label="单位：" prop="unit" label-width="85px">
+										<el-select v-model="temp.unit" placeholder="选择单位" class="filter-item" style="width: 100%">
+											<el-option v-for="item in companyType" :key="item.key" :label="item.company" :value="item.company" />
   									</el-select>
 									</el-form-item>
 								</el-col>
 							</el-row>
 							<el-row :gutter="10">
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="是否达标：" prop="status" label-width="85px">
-										<el-select v-model="temp.status" placeholder="选择是否达标" class="filter-item" style="width: 100%">
-											<el-option v-for="item in statusType" :key="item.key" :label="item.status" :value="item.key" />
+									<el-form-item label="是否达标：" prop="is_qualified" label-width="85px">
+										<el-select v-model="temp.is_qualified" placeholder="选择是否达标" class="filter-item" style="width: 100%">
+											<el-option v-for="item in statusType" :key="item.status" :label="item.status" :value="item.status" />
   									</el-select>
 									</el-form-item>
 								</el-col>
 								<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-									<el-form-item label="超标倍数:" prop="name" label-width="85px">
+									<el-form-item label="超标倍数:" prop="multiple" label-width="85px">
 										<el-input v-model="temp.multiple"></el-input>
 									</el-form-item>
 								</el-col>
@@ -163,20 +169,15 @@
 </template>
 
 <script>
-	import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/mpoint-management'
-	import waves from '@/directive/waves' // waves directive
+	import { fetchList, createdata, updateDatas, deleteBasidata, getPointsData } from '@/api/monitoring-data'
+	import waves from '@/directive/waves' 
 	import { parseTime } from '@/utils'
-	import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+	import Pagination from '@/components/Pagination'
 
-	const mpointType = [
-		{key: 1,name: '环保监测点'},
-		{key: 2,name: '水文监测点'},
-		{key: 3,name: '污染源监测点'}
-	]
-	const targetType = [
-		{key: 1,target: '石油类'},
-		{key: 2,target: '石油类'},
-		{key: 3,target: '石油类'}
+	const targetTypes = [
+		{key: 1,name: '指标1'},
+		{key: 2,name: '指标2'},
+		{key: 3,name: '指标3'}
 	]
 	const companyType = [
 		{key: 1,company: 'mg/L'},
@@ -196,80 +197,24 @@
 		directives: {
 			waves
 		},
-		filters: {
-			statusFilter(status) {
-				const statusMap = {
-					published: 'success',
-					draft: 'info',
-					deleted: 'danger'
-				}
-				return statusMap[status]
-			},
-			typeFilter(type) {
-				return calendarTypeKeyValue[type]
-			}
-		},
 		data() {
 			let self = this;
 			return {
-				mpointType,
-				targetType,
+				pointsList:null,
+				targetTypes,
 				companyType,
 				statusType,
-				listdata: [{
-						id: 1,
-						name: "晋江监测点",
-						time: "2019-07-15",
-						target: "石油类",
-						mvalue: "1",
-						svalue: "1",
-						company: "mg/L",
-						status: 1,
-						multiple: "2"
-					},
-					{
-						id: 1,
-						name: "晋江监测点",
-						time: "2019-07-15",
-						target: "石油类",
-						mvalue: "1",
-						svalue: "1",
-						company: "mg/L",
-						status: 1,
-						multiple: "2"
-					},
-					{
-						id: 1,
-						name: "晋江监测点",
-						time: "2019-07-15",
-						target: "石油类",
-						mvalue: "1",
-						svalue: "1",
-						company: "mg/L",
-						status: 1,
-						multiple: "2"
-					},
-					{
-						id: 1,
-						name: "晋江监测点",
-						time: "2019-07-15",
-						target: "石油类",
-						mvalue: "1",
-						svalue: "1",
-						company: "mg/L",
-						status: 1,
-						multiple: "2"
-					}
-				],
 				parentName: "无",
 				tableKey: 0,
 				list: null,
 				total: 0,
 				listLoading: false,
 				listQuery: {
-					page: 1,
+					pageIndex: 1,
 					name: undefined,
-					code: undefined
+					start_time:undefined,
+					end_time:undefined,
+					quota: undefined
 				},
 				importanceOptions: [1, 2, 3],
 				sortOptions: [{
@@ -283,14 +228,16 @@
 				showReviewer: false,
 				temp: {
 					id: undefined,
-					name: '',
-					time: '',
-					target: '',
-					mvalue: undefined,
-					svalue: undefined,
-					company: '',
-					status: '',
-					multiple:undefined
+					is_qualified:undefined,
+					monitor_value:undefined,
+					standard_value:undefined,
+					multiple:undefined,
+					quota:undefined,
+					time:undefined,
+					unit:undefined,
+					pointInfo:[
+						
+					]
 				},
 				dialogFormVisible: false,
 				dialogStatus: '',
@@ -301,13 +248,12 @@
 				dialogPvVisible: false,
 				pvData: [],
 				rules: {
-					name: [{
+					pointId: [{
 						required: true,
 						message: '监测点名称不能为空',
 						trigger: 'change'
 					}],
-					target: [{
-						type: 'date',
+					quota: [{
 						required: true,
 						message: '指标不能为空',
 						trigger: 'change'
@@ -317,22 +263,22 @@
 						message: '监测时间不能为空',
 						trigger: 'blur'
 					}],
-					mvalue: [{
+					monitor_value: [{
 						required: true,
 						message: '监测值不能为空',
 						trigger: 'blur'
 					}],
-					svalue: [{
+					standard_value: [{
 						required: true,
 						message: '标准值不能为空',
 						trigger: 'blur'
 					}],
-					company: [{
+					unit: [{
 						required: true,
 						message: '单位不能为空',
 						trigger: 'blur'
 					}],
-					status: [{
+					is_qualified: [{
 						required: true,
 						message: '状态不能为空',
 						trigger: 'blur'
@@ -342,36 +288,54 @@
 			}
 		},
 		created() {
-			//			  this.getList()
+			this.getList(),
+			this.getPoints()
 		},
 		methods: {
+			//获取列表数据
 			getList() {
 				this.listLoading = true
 				fetchList(this.listQuery).then(response => {
-					this.list = response.data.items
-					this.total = response.data.total
-					//					 Just to simulate the time of the request
-					setTimeout(() => {
-						this.listLoading = false
-					}, 1.5 * 1000)
+					console.log(response)
+					this.list = response.data.list
+					this.total = response.data.totalRecords
+					this.listLoading = false
+				})
+			},
+			//获取监测点数据
+			getPoints(){
+				getPointsData().then(response => {
+					console.log(response)
+					this.pointsList = response.data
 				})
 			},
 			//查询
 			handleFilter() {
-				this.listQuery.page = 1
+				this.listQuery.pageIndex = 1
+				if(this.listQuery.name==""){
+					this.listQuery.name = undefined
+				}
+				if(this.listQuery.end_time==""){
+					this.listQuery.end_time = undefined
+				}
+				if(this.listQuery.start_time==""){
+					this.listQuery.start_time = undefined
+				}
+				
+				console.log(this.listQuery)
 				this.getList()
 			},
 			resetTemp() {
 				this.temp = {
 					id: undefined,
-					name: '',
-					time: '',
-					target: '',
-					mvalue: undefined,
-					svalue: undefined,
-					company: '',
-					status: '',
-					multiple:undefined
+					is_qualified:undefined,
+					monitor_value:undefined,
+					standard_value:undefined,
+					multiple:undefined,
+					quota:undefined,
+					time:undefined,
+					unit:undefined,
+					pointInfo:{}
 				}
 			},
 			handleCreate() {
@@ -386,22 +350,30 @@
 				this.$refs['dataForm'].validate((valid) => {
 					if(valid) {
 						this.temp.time = +new Date(this.temp.time)
+						const points = this.pointsList;
+						for (var i=0;i<points.length;i++) {
+							if(points[i].id == this.temp.pointId){
+								this.temp.pointInfo = points[i]
+							}
+						}
 						console.log(this.temp)
-//						createArticle(this.temp).then(() => {
-//							this.list.unshift(this.temp)
-//							this.dialogFormVisible = false
-//							this.$notify({
-//								title: 'Success',
-//								message: 'Created Successfully',
-//								type: 'success',
-//								duration: 2000
-//							})
-//						})
+						createdata(this.temp).then(() => {
+							this.list.unshift(this.temp)
+							this.dialogFormVisible = false
+							this.$notify({
+								title: 'Success',
+								message: 'Created Successfully',
+								type: 'success',
+								duration: 2000
+							})
+						})
+						this.refreshData();
 					}
 				})
 			},
 			handleUpdate(row) {
 				this.temp = Object.assign({}, row) // copy obj
+				console.log(this.temp)
 				this.temp.timestamp = new Date(this.temp.timestamp)
 				this.dialogStatus = 'update'
 				this.dialogFormVisible = true
@@ -413,30 +385,28 @@
 				this.$refs['dataForm'].validate((valid) => {
 					if(valid) {
 						const tempData = Object.assign({}, this.temp)
-						tempData.time = +new Date(tempData.time)
-						console.log(tempData)
-//						updateArticle(tempData).then(() => {
-//							for(const v of this.list) {
-//								if(v.id === this.temp.id) {
-//									const index = this.list.indexOf(v)
-//									this.list.splice(index, 1, this.temp)
-//									break
-//								}
-//							}
-//							this.dialogFormVisible = false
-//							this.$notify({
-//								title: 'Success',
-//								message: 'Update Successfully',
-//								type: 'success',
-//								duration: 2000
-//							})
-//						})
+						const points = this.pointsList;
+						for (var i=0;i<points.length;i++) {
+							if(points[i].id == tempData.pointId){
+								tempData.pointInfo = points[i]
+							}
+						}
+						updateDatas(tempData).then(() => {
+							this.dialogFormVisible = false
+							this.$notify({
+								title: 'Success',
+								message: 'Update Successfully',
+								type: 'success',
+								duration: 2000
+							})
+						})
+						this.refreshData();
 					}
 				})
 			},
 			//删除
 			handledelete(row) {
-				var statusvalue = "你确定要删除" + row.name + "数据？";
+				var statusvalue = "你确定要删除" + row.pointInfo.name + "数据？";
 				this.$confirm(statusvalue, '删除', {
 						confirmButtonText: '确定',
 						cancelButtonText: '取消',
@@ -444,18 +414,23 @@
 					})
 					.then(async() => {
 						console.log(row.id)
-//						await deleteBasidata(row.id)
-//						this.$message({
-//							type: 'success',
-//							message: '删除成功'
-//						})
-//						this.treeId = row.parentId;
-//						this.refreshData();
+						await deleteBasidata(row.id)
+						this.$message({
+							type: 'success',
+							message: '删除成功'
+						})
+						this.refreshData();
 					})
 					.catch(err => {
 						console.error(err)
 					})
-			}
+			},
+			//刷新数据
+			refreshData() {
+        		return setTimeout(()=>{
+						this.getList();
+        		},1000)
+      		},
 			
 		}
 	}
@@ -492,5 +467,8 @@
 	}
 	.el-date-editor.el-input{
 		width: 100%;
+	}
+	.el-input--medium .el-input__icon{
+		height: 36px;
 	}
 </style>

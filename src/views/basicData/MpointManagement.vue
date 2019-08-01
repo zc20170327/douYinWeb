@@ -6,13 +6,14 @@
 			<el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
 				查询
 			</el-button>
-			<!--<router-link :to="{path:'/basicData/toDetail',query:{id:0}}">-->
-			<el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
+			<router-link :to="{path:'/basicData/toDetail',query:{id:0}}">
+			<!--<el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">-->
+			<el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit">
 				创建监测点
 			</el-button>
-			<!--</router-link>-->
+			</router-link>
 		</div>
-
+		<div style="width: 100%;height: 400px;">
 		<el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
 			<el-table-column label="序号" prop="id" align="center" width="80">
 				<template slot-scope="scope">
@@ -44,13 +45,10 @@
 					</el-button>
 				</template>
 			</el-table-column>
-			<el-table-column label="">
-				<template slot-scope="{row}">
-					<span class="link-type"></span>
-				</template>
+			<el-table-column min-width="1">
 			</el-table-column>
 		</el-table>
-
+		</div>
 		<pagination v-show="total>0" :total="total" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.limit" @pagination="getList" />
 
 		<!--弹出框-->
@@ -506,7 +504,6 @@
 						}
 					}
 					this.list = datas
-					console.log(datas)
 					this.total = response.data.totalRecords
 					setTimeout(() => {
 						this.listLoading = false
@@ -531,6 +528,9 @@
 			//查询
 			handleFilter() {
 				this.listQuery.pageIndex = 1
+				if(this.listQuery.name == ""){
+					this.listQuery.name = undefined
+				}
 				console.log(this.listQuery);
 				this.getList()
 			},

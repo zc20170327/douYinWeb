@@ -43,4 +43,3 @@ export function deleteBasidata(id) {
 
 
 
-

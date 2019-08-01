@@ -73,10 +73,10 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/index',
     children: [
       {
-        path: 'dashboard',
+        path: 'index',
         component: () => import('@/views/index/index'),
         name: 'Dashboard',
         meta: { title: '首页', icon: 'dashboard', affix: true }
@@ -104,25 +104,25 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-  {
-    path: '/icon',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/icons/index'),
-        name: 'Icons',
-        meta: { title: 'Icons', icon: 'icon', noCache: true }
-      }
-    ]
-  },
+//{
+//  path: '/icon',
+//  component: Layout,
+//  children: [
+//    {
+//      path: 'index',
+//      component: () => import('@/views/icons/index'),
+//      name: 'Icons',
+//      meta: { title: 'Icons', icon: 'icon', noCache: true }
+//    }
+//  ]
+//},
 
   {
     path: '/basicData',
     component: Layout,
     redirect: '/basicData/index',
     alwaysShow: true,
-    name: '基础信息管理',
+    name: 'Dashboard',
     meta: { title: '基础信息管理', icon: 'list' },
     children: [
       {
@@ -143,18 +143,18 @@ export const asyncRoutes = [
         name: '监测点管理',
         meta: { title: '监测点管理' }
       },
-      {
-        path: 'ceshi',
-        component: () => import('@/views/basicData/ceshi'),
-        name: '测试',
-        meta: { title: '测试' }
-      },
+//    {
+//      path: 'ceshi',
+//      component: () => import('@/views/basicData/ceshi'),
+//      name: '测试',
+//      meta: { title: '测试' }
+//    },
       {
         path: 'toDetail',
         component: () => import('@/views/basicData/toDetail'),
-        name: '创建',
+        name: '监测点',
         hidden: true,
-        meta: { title: '创建' }
+        meta: { title: '监测点' }
       }
 
     ]
@@ -164,7 +164,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/systemManagement/organization',
     alwaysShow: true,
-    name: '系统管理',
+    name: 'Dashboard',
     meta: { title: '系统管理', icon: 'tree' },
     children: [
       {
@@ -187,7 +187,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/statisticalAnalysis/monitoringData',
     alwaysShow: true,
-    name: '统计分析',
+    name: 'Dashboard',
     meta: { title: '统计分析', icon: 'component' },
     children: [
       {
@@ -211,7 +211,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/filesManagement',
     alwaysShow: true,
-    name: '业务管理',
+    name: 'Dashboard',
     meta: { title: '业务管理', icon: 'list' },
     children: [
       {

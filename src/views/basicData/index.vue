@@ -15,8 +15,11 @@
 					新建基础数据
 				</el-button>
 			</div>
+			<div style="width: 100%;height: 400px;">
 			<el-table :data="list" border style="width: 100%;" @sort-change="sortChange">
-				<el-table-column label="序号" prop="id" sortable="custom" align="center" width="100">
+				<el-table-column label="序号" align="center" type="index" :index="indexMethod" width="100">
+    			</el-table-column>
+				<el-table-column label="ID" prop="id"  align="center" width="100">
 					<template slot-scope="scope">
 						<span>{{ scope.row.id }}</span>
 					</template>
@@ -38,12 +41,12 @@
 						</el-tag>
 					</template>
 				</el-table-column>
-				<el-table-column label="操作" min-width="230" class-name="small-padding fixed-width">
+				<el-table-column label="操作" width="250" align="center">
 					<template slot-scope="{row}">
-						<el-button size="mini" type="defalt" @click="getDetailData(row)">
+						<el-button size="mini" type="defalt" @click="handleUpdate(row,'look')">
 							查看
 						</el-button>
-						<el-button type="primary" size="mini" @click="handleUpdate(row)">
+						<el-button type="primary" size="mini" @click="handleUpdate(row,'updata')">
 							编辑
 						</el-button>
 						<el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handledelete(row)">
@@ -51,8 +54,10 @@
 						</el-button>
 					</template>
 				</el-table-column>
+				<el-table-column min-width="1">
+				</el-table-column>
 			</el-table>
-
+			</div>
 			<pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNo" @pagination="getList" />
 			<!--弹出框-->
 			<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" top="0">
@@ -80,7 +85,10 @@
 					<el-button @click="dialogFormVisible = false">
 						取消
 					</el-button>
-					<el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+					<el-button v-if="dialogStatus==='look'" disabled>
+						保存
+					</el-button>
+					<el-button v-else type="primary" @click="dialogStatus==='create'?createData():updateData()">
 						保存
 					</el-button>
 				</div>
@@ -151,7 +159,7 @@
 				textMap: {
 					update: '编辑基础数据',
 					create: '新建基础数据',
-					getdetail: '查看基础数据'
+					look: '查看基础数据'
 				},
 				dialogPvVisible: false,
 				pvData: [],
@@ -178,6 +186,7 @@
 			}
 		},
 		created() {
+			let that = this
 			this.getList(),
 				this.getHeight(),
 				this.getTreeData(),
@@ -251,15 +260,15 @@
 			},
 
 			//查看
-			getDetailData(row) {
-				this.temp = Object.assign({}, row) // copy obj
-				//    console.log(this.temp);
-				this.dialogStatus = 'getdetail'
-				this.dialogFormVisible = true
-				this.$nextTick(() => {
-					this.$refs['dataForm'].clearValidate()
-				})
-			},
+//			getDetailData(row) {
+//				this.temp = Object.assign({}, row) // copy obj
+//				//    console.log(this.temp);
+//				this.dialogStatus = 'getdetail'
+//				this.dialogFormVisible = true
+//				this.$nextTick(() => {
+//					this.$refs['dataForm'].clearValidate()
+//				})
+//			},
 			//创建
 			handleCreate() {
 				this.resetTemp()
@@ -290,7 +299,13 @@
 				this.refreshData();
 			},
 			//  编辑
-			handleUpdate(row) {
+			handleUpdate(row,tip) {
+				if(tip=="updata"){
+					this.dialogStatus = 'update'
+				}else if(tip=="look"){
+					this.dialogStatus = 'look'
+				}
+				
 				console.log(row)
 				if(row.status==1){
 					row.status = true;
@@ -388,6 +403,7 @@
 						label:'基础数据',
 						children:treeData
 					}];
+					console.log(trees)
  				this.treelist = trees;
  				
 					setTimeout(() => {
@@ -451,6 +467,7 @@
 					this.listLoading = false
 				})
 			},
+			//查询
 			handleFilter() {
 				this.listQuery.page = 1
 				this.getList()
@@ -470,7 +487,11 @@
 				if(prop === 'id') {
 					this.sortByID(order)
 				}
-			}
+			},
+			//序号
+			indexMethod(index) {
+        		return index+1 + (this.listQuery.pageNo-1)*5;
+      		}
 
 		}
 	}

@@ -15,7 +15,7 @@
 							<el-col :span="12" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
 								<el-form-item label="问题来源：" prop="categoryId" label-width="85px">
 									<el-select v-model="temp.resource" placeholder="选择问题来源" class="filter-item" style="width: 100%">
-										<el-option v-for="item in mpointType" :key="item.key" :label="item.display_name" :value="item.key" />
+										<el-option v-for="item in resQuestion" :key="item.id" :label="item.name" :value="item.id" />
 									</el-select>
 								</el-form-item>
 							</el-col>
@@ -24,7 +24,7 @@
 							<el-col :span="24">
 								<el-form-item label="问题类型：" label-width="85px">
 									<el-select v-model="temp.categoryId" placeholder="选择问题类型" class="filter-item" style="width: 100%">
-										<el-option v-for="item in mpointType" :key="item.key" :label="item.display_name" :value="item.key" />
+										<el-option v-for="item in typeQuestion" :key="item.id" :label="item.name" :value="item.id" />
 									</el-select>
 								</el-form-item>
 							</el-col>
@@ -196,18 +196,15 @@
 <script>
 	import { uploadFiles,fetchList, createdata, updateData } from '@/api/filesManagement/files-record'
 
-	const mpointType = [{
-			key: 1,
-			display_name: '环保监测点'
-		},
-		{
-			key: 2,
-			display_name: '水文监测点'
-		},
-		{
-			key: 3,
-			display_name: '污染源监测点'
-		}
+	const resQuestion = [
+		{id: 1,name: '问题来源1'},
+		{id: 2,name: '问题来源2'},
+		{id: 3,name: '问题来源3'}
+	]
+	const typeQuestion = [
+		{id: 1,name: '问题类型1'},
+		{id: 2,name: '问题类型2'},
+		{id: 3,name: '问题类型3'}
 	]
 	const department = [{
 			id: 0,
@@ -235,7 +232,8 @@
 				contentStyleObj: {
 					height: ''
 				},
-				mpointType,
+				resQuestion,
+				typeQuestion,
 				department,
 				btnclevel: '获取',
 				btnpoint: '定位',

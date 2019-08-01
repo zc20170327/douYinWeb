@@ -24,8 +24,8 @@ export default {
   },
   data() {
     return {
-      title: '重庆河长制系统',
-      logo: './logo.png'
+      title: '重庆智绘点途',
+      logo: './logo1.png'
     }
   }
 }
